@@ -1,0 +1,90 @@
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,400;1,500&display=swap');
+:root {
+    --white: #fff;
+    --black: #000;
+    --text-color: #333;
+
+    --primary: rgb(98, 199, 227);
+    --header-height: 70px ;
+    --sidebar-width: 288px ;
+    
+
+}
+
+
+* {
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    text-rendering: optimizespeed;
+    color: var(--text-color);
+    scroll-behavior: smooth;
+}
+
+button,
+input,
+[tabindex] {
+    outline: none;
+    border: none;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.bg-white {
+    background-color: #fff !important;
+}
+
+.body-bg {
+    background-color: #f4f7f6 !important;
+}
+
+.py-32 {
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+}
+
+.my-32 {
+    margin-top: 32px !important;
+    margin-bottom: 32px !important;
+} 
+
+
+// ::-webkit-scrollbar {
+//     width: 5px;
+// }
+
+// ::-webkit-scrollbar-track {
+//     background: var(--white);
+// }
+
+// ::-webkit-scrollbar-thumb {
+//     background: var(--primary);
+//     border-radius: 3px;
+//     margin-top: 20px;
+//     margin-bottom: 20px;
+
+
+// }
+
+// ::-webkit-scrollbar-thumb:hover {
+//     background:  rgb(164, 239, 211);
+// }
+
+
+
+// .bg-tab-sidebar {
+//     background-color: rgba(83, 156, 240, 0.8);
+// }
