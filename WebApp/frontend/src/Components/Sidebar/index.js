@@ -102,21 +102,20 @@ function Sidebar() {
                 ),
               },
               {
-                title: "Water plan",
-                itemId: "/plan",
+                title: "Water & light plan",
                 elemBefore: () => (
                   <BsCalendarDate color="var(--primary)" size={24} />
                 ),
-                // subNav: [ // Sử dụng nếu có menu con
-                //   {
-                //     title: 'Projects',
-                //     itemId: '/management/projects',
-                //   },
-                //   {
-                //     title: 'Members',
-                //     itemId: '/management/members',
-                //   },
-                // ],
+                subNav: [ // Sử dụng nếu có menu con
+                  {
+                    title: 'Water plan',
+                    itemId: '/waterplan',
+                  },
+                  {
+                    title: 'Light plan',
+                    itemId: '/lightplan',
+                  },
+                ],
               },
               {
                 title: "Set threshold",
