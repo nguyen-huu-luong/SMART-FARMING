@@ -1,5 +1,7 @@
 import Dashboard from "../Pages/Dashborad"
 import MainLayout from "../Layouts/MainLayout"
+import WaterPlan from "../Pages/Plan/WaterPlan"
+import LightPlan from "../Pages/Plan/LightPlan"
 import Home from "../Pages/Home"
 import Login from "../Pages/Login"
 import LoginLayout from "../Layouts/LoginLayout"
@@ -8,6 +10,12 @@ import Register from "../Pages/Register"
 export const routes = [
     {
         path: '/' , component: Home, layout: null
+    },
+    {
+        path: '/waterplan' , component: WaterPlan, layout: MainLayout
+    },
+    {
+        path: '/lightplan' , component: LightPlan, layout: MainLayout
     },
     {
         path: '/Login' , component:Login, layout: LoginLayout
