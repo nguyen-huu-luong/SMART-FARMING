@@ -1,6 +1,6 @@
 .body-wrapper {
     margin-top: var(--header-height);
-    height: 100vh;
+    height: calc(100% - var(--header-height));
 }
 
 .content {

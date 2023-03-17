@@ -7,7 +7,6 @@ import { TbDeviceDesktop } from "react-icons/tb";
 import { BsMoisture } from "react-icons/bs";
 import { MdOutlineLightMode } from "react-icons/md";
 import { FaTemperatureHigh } from "react-icons/fa";
-import { AiOutlineArrowLeft } from "react-icons/ai";
 import avatar from "../../Assets/Image/avatar.webp";
 
 import "react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css";
@@ -51,15 +50,15 @@ function Sidebar() {
           {/* Current Environmental parameters */}
           <div className="p-4 d-flex flex-wrap justify-content-between text-center">
             <div className="">
-              <FaTemperatureHigh color="red" size={24} />
+              <FaTemperatureHigh color="#E9652D" size={24} />
               <p className="mt-1">32 (ºC)</p>
             </div>
             <div className="mx-2">
-              <BsMoisture color="blue" size={24} />
+              <BsMoisture color="#0E9CFF" size={24} />
               <p className="mt-1">80 (%)</p>
             </div>
             <div>
-              <MdOutlineLightMode color="#bfbf1c" size={24} />
+              <MdOutlineLightMode color="#FFD600" size={24} />
               <p className="mt-1">500 (LUX)</p>
             </div>
           </div>
@@ -75,22 +74,13 @@ function Sidebar() {
             items={[
               {
                 title: "Dashboard",
-                itemId: "/",
+                itemId: "/dashboard",
                 // you can use your own custom Icon component as well
                 // icon is optional
                 elemBefore: () => (
                   <AiOutlineHome color="var(--primary)" size={24} />
                 ),
-                subNav: [
-                  {
-                    title: "Sub menu",
-                    itemId: "/management/teams",
-                  },
-                  {
-                    title: "Sub menu",
-                    itemId: "/management/teams",
-                  },
-                ],
+               
               },
               {
                 title: "Devices",
