@@ -4,6 +4,7 @@ import { AiOutlineBell, AiOutlineLogout } from "react-icons/ai";
 import Popper from "../Popper";
 import { Fragment } from "react";
 import { IconButton, Tooltip } from "@mui/material";
+import { Link } from "react-router-dom"
 
 function Header() {
   let numNotify = 70;
@@ -40,9 +41,9 @@ function Header() {
           Hiển thị danh sách thông báo ở đây
         </Popper>
         <Tooltip title="Logout" arrow>
-          <IconButton color="default" className="bg-white text-dark">
-            <AiOutlineLogout size={32} />
-          </IconButton>
+        <Link to="/">  <IconButton color="default" className="bg-white text-dark">
+          <AiOutlineLogout size={32} />
+          </IconButton> </Link> 
         </Tooltip>
       </div>
     </div>

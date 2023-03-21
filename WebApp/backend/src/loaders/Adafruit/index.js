@@ -1,6 +1,7 @@
 const mqtt = require("mqtt");
 let client = mqtt.connect('mqtt://triethoang:aio_chNI54RK6vvna3Rdr3IM52LcnMdF@io.adafruit.com',8883)
 let devAct = require("../../models/DevideAcivity/devideAtivity.model").model
+
 exports.adafruit = () => {
     client.on("connect", function() {
         client.subscribe("triethoang/feeds/cambien1")  // temp
