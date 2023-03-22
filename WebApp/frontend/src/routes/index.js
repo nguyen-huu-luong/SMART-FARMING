@@ -6,6 +6,7 @@ import Home from "../Pages/Home"
 import Login from "../Pages/Login"
 import LoginLayout from "../Layouts/LoginLayout"
 import Register from "../Pages/Register"
+import Devices from "../Pages/Devices"
 
 export const routes = [
     {
@@ -25,5 +26,8 @@ export const routes = [
     },
     {
         path: '/Dashboard' , component: Dashboard, layout: MainLayout
+    },
+    {
+        path: '/devices' , component: Devices, layout: MainLayout
     }
 ]

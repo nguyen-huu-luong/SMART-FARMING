@@ -18,6 +18,7 @@ function Sidebar() {
   const currentParams = useSelector(
     (state) => state.enviromentParams.enviromentParams
   );
+
   const navigate = useNavigate();
   const kFormatter = (num) => {
     return Math.abs(num) > 999
@@ -75,7 +76,7 @@ function Sidebar() {
 
           <Navigation
             // you can use your own router's api to get pathname
-            activeItemId="/dashboard"
+            activeItemId = {document.location.pathname}
             onSelect={({ itemId, index }) => {
               navigate(itemId);
             }}
