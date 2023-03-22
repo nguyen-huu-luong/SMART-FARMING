@@ -8,9 +8,9 @@ function MainLayout({ children }) {
     <Fragment>
       <Header />
       <div className="w-100 d-flex h-100">
-        <div className="body-bg body-wrapper d-flex w-100 p-0">
+        <div className=" body-wrapper d-flex w-100 p-0">
           <Sidebar />
-          <div className="content w-100">{children}</div>
+          <div className="body-bg content w-100" style={{minHeight: 'calc(100vh - var(--header-height)'}}>{children}</div>
         </div>
       </div>
     </Fragment>

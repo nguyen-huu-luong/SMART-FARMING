@@ -1,8 +1,6 @@
 let dbConnect = require("./MongoDB")
 let ioConnect = require("./adafruit")
-let socketServer = require("./SocketIo")
-exports.loader = async () => {
+exports.loader = async (socket) => {
     await dbConnect.db()
-    ioConnect.adafruit()
-    socketServer.connect()
+    ioConnect.adafruit(socket)
 }

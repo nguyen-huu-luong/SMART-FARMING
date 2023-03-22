@@ -5,9 +5,9 @@ let client = mqtt.connect(
   8883
 );
 let Record = require("../../models/records.model").model;
-let socketIo = require("../SocketIo").socketIo;
+let socketIo = require('../../app')
 
-exports.adafruit = () => {
+exports.adafruit = (socketIo) => {
   client.on("connect", function () {
     client.subscribe("vuonglht/feeds/cambien1"); // temp
     client.subscribe("vuonglht/feeds/cambien2"); // light
