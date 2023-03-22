@@ -29,5 +29,8 @@ export const routes = [
     },
     {
         path: '/devices' , component: Devices, layout: MainLayout
+    },
+    {
+        path: '/Threshold' , component: Threshold, layout: MainLayout
     }
 ]
