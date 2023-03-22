@@ -42,7 +42,7 @@ ChartJS.register(
   LineController,
   BarController
 );
-const host = "http://localhost:3001";
+const host = "http://localhost:3003";
 const labels = [
   "11 March",
   " 12 March",
