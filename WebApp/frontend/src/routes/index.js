@@ -6,6 +6,7 @@ import Home from "../Pages/Home"
 import Login from "../Pages/Login"
 import LoginLayout from "../Layouts/LoginLayout"
 import Register from "../Pages/Register"
+import Threshold from "../Pages/Threshold"
 
 export const routes = [
     {
@@ -24,6 +25,9 @@ export const routes = [
         path: '/Register' , component: Register, layout: LoginLayout
     },
     {
-        path: '/Dashboard' , component: Dashboard, layout: MainLayout
+        path: '/dashboard' , component: Dashboard, layout: MainLayout
+    },
+    {
+        path: '/Threshold' , component: Threshold, layout: MainLayout
     }
 ]

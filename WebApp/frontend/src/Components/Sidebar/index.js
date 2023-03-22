@@ -109,7 +109,7 @@ function Sidebar() {
               },
               {
                 title: "Set threshold",
-                itemId: "/threshold",
+                itemId: "/Threshold",
                 elemBefore: () => (
                   <AiOutlineCode color="var(--primary)" size={24} />
                 ),
