@@ -34,8 +34,8 @@ const Home = () => {
                 </div>
                 <div className="container-fluid row mb-5">
                     {
-                        serviceHome.map((item) => (
-                            <div className="col-md">
+                        serviceHome.map((item, index) => (
+                            <div key={index} className="col-md">
                         <div><img src={item.img} style={{width:"140px", height:"140px"}} />
                             <h6 className="my-3">{item.titile}</h6>
                             <p className="fst-italic  text-secondary">{item.info}</p>

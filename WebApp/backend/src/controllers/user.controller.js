@@ -1,4 +1,4 @@
-let user = require("../../models/User/user.model").model
+let user = require("../models/user.model").model
 
 exports.getUserId = async (req, res, next) => {
     try {

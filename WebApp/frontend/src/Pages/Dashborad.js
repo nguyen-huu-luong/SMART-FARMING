@@ -2,7 +2,7 @@ import moment from "moment";
 import StatusBar from "../Components/StatusBar";
 import { Col, Container, Row } from "react-bootstrap";
 import { AiFillDownCircle, AiFillUpCircle } from "react-icons/ai";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineCalendar } from "react-icons/ai";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -11,6 +11,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import socketIOClient from "socket.io-client";
 
 import {
   Chart as ChartJS,
@@ -26,6 +27,9 @@ import {
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
+import { useDispatch, useSelector } from "react-redux";
+import { getEnviromentParams, updateHumidity, updateLight, updateTemperature } from "../redux/features/recordSlice";
+import { getUnit } from "../helper/helper";
 
 ChartJS.register(
   LinearScale,
@@ -38,7 +42,15 @@ ChartJS.register(
   LineController,
   BarController
 );
-const labels = ["11 March", " 12 March", " 13 March", "14 March", "15 March", "16 March"];
+const host = "http://localhost:3001";
+const labels = [
+  "11 March",
+  " 12 March",
+  " 13 March",
+  "14 March",
+  "15 March",
+  "16 March",
+];
 
 const data = {
   labels,
@@ -63,58 +75,58 @@ const data = {
   ],
 };
 
-let enviromentParams = [
-  {
-    type: "Temperature",
-    value: 37,
-    unit: "°C",
-    compare: -2,
-    lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-  },
-  {
-    type: "Soil humidity",
-    value: 75,
-    unit: "%",
-    compare: 15,
-    lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-  },
-  {
-    type: "Light",
-    value: 1800,
-    unit: "LUX",
-    compare: 34,
-    lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-  },
-];
+// let enviromentParams = [
+//   {
+//     type: "Temperature",
+//     value: 37,
+//     unit: "°C",
+//     compare: -2,
+//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
+//   },
+//   {
+//     type: "Soil humidity",
+//     value: 75,
+//     unit: "%",
+//     compare: 15,  
+//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
+//   },
+//   {
+//     type: "Light",
+//     value: 1800,
+//     unit: "LUX",
+//     compare: 34,
+//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
+//   },
+// ];
 function DataBox({ data }) {
-  data.color = "#0E9CFF";
-  if (data.type === "Temperature") data.color = "#E9652D";
-  else if (data.type === "Light") data.color = "#FFD600";
-
+  if (data === {}) return <></> 
+  let color = "#0E9CFF";
+  if (data.type === "Temp") color = "#E9652D";
+  else if (data.type === "Light") color = "#FFD600";
   return (
     <Col
       className="bg-white shadow p-3"
-      style={{ borderBottom: `6px solid ${data.color}`, borderRadius: 8 }}
+      style={{ borderBottom: `6px solid ${color}`, borderRadius: 8 }}
     >
       <div className="d-flex align-items-center justify-content-between">
         <span>{data.type}</span>
-        <span style={{ color: data.color }}>
-          {data.value + ` (${data.unit})`}
+        <span style={{ color: color }}>
+          {data.value + ` (${getUnit(data.type)})`}
         </span>
       </div>
       <div className="my-2">
-        {data.compare >= 0 ? (
+        {data.compare && data.compare >= 0 ? (
           <span>
-            <AiFillUpCircle color={data.color} size={24} />
+            <AiFillUpCircle color={color} size={24} />
           </span>
         ) : (
           <span>
-            <AiFillDownCircle size={24} color={data.color} />
+            <AiFillDownCircle size={24} color={color} />
           </span>
         )}
-        <span className="ms-2">{Math.abs(data.value) + ` (${data.unit})`}</span>
+        <span className="ms-2">{data.compare ? Math.abs(data.compare).toFixed(2): 0 + ` (${getUnit(data.type)})`}</span>
       </div>
-      <span>{"Last update: " + data.lastUpdated}</span>
+      <span>{"Last update: " + moment(data.createAt).format("h:mm:ss A, MMMM Do YYYY")}</span>
     </Col>
   );
 }
@@ -129,14 +141,44 @@ const rows = [
   createData("This month", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
 ];
 function Dashboard() {
+  const {enviromentParams} = useSelector(state => ({...state.enviromentParams}))
+  const dispatch = useDispatch()
+  const socketRef = useRef();
+  console.log("re-render")
+  // get initial enviroment parameters
+  useEffect(() => {
+    dispatch(getEnviromentParams())
+  }, [])
+
+  useEffect(() => {
+    // connect to host
+    socketRef.current = socketIOClient.connect(host)
+
+    // handle when received data from socket server
+    socketRef.current.on("CollectTemperature", (data) => {
+      dispatch(updateTemperature(data))
+    }); 
+    socketRef.current.on("CollectLight", (data) => {
+      
+     dispatch(updateLight(data))
+    }); 
+    socketRef.current.on("CollectHumidity", (data) => {
+     dispatch(updateHumidity(data))
+    }); 
+    
+    // disconnect to socket server
+    return () => {
+      socketRef.current.disconnect();
+    }; 
+  }, []);
+  
   return (
     <>
       <Container className="p-4 d-flex flex-column w-100 gap-2 h-100">
         <StatusBar title="Dashboard" />
-
         <Row className="gap-3 mx-2 w-100">
           {enviromentParams.map((item, index) => (
-            <DataBox index={index} data={item} />
+            <DataBox key={index} data={item} />
           ))}
         </Row>
         <Row className="bg-white shadow mx-2 p-3 my-2 rounded w-100">
@@ -194,23 +236,29 @@ function Dashboard() {
           </div>
         </Row>
 
-        <TableContainer component={Paper} className="bg-white shadow mx-2 p-3 my-2 rounded w-100 border-0">
+        <TableContainer
+          component={Paper}
+          className="bg-white shadow mx-2 p-3 my-2 rounded w-100 border-0"
+        >
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
             <TableHead sx={{ "td,th,tr": { border: 0 } }}>
               <TableRow>
-                <TableCell align="lefft">Average</TableCell>
-                <TableCell sx={{color: '#e9652d'}} align="left">Temperuture</TableCell>
-                <TableCell sx={{color: '#0e9cff'}} align="left">Soil humidity</TableCell>
-                <TableCell sx={{color: '#ffd600'}} align="left">Light</TableCell>
+                <TableCell align="left">Average</TableCell>
+                <TableCell sx={{ color: "#e9652d" }} align="left">
+                  Temperuture
+                </TableCell>
+                <TableCell sx={{ color: "#0e9cff" }} align="left">
+                  Soil humidity
+                </TableCell>
+                <TableCell sx={{ color: "#ffd600" }} align="left">
+                  Light
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.name}
-                  sx={{ "td,th,tr": { border: 0 } }}
-                >
-                  <TableCell align="left" >{row.title}</TableCell>
+              {rows.map((row, index) => (
+                <TableRow key={index} sx={{ "td,th,tr": { border: 0 } }}>
+                  <TableCell align="left">{row.title}</TableCell>
                   <TableCell align="left">{row.temperature}</TableCell>
                   <TableCell align="left">{row.soil}</TableCell>
                   <TableCell align="left">{row.light}</TableCell>
@@ -218,7 +266,9 @@ function Dashboard() {
               ))}
             </TableBody>
           </Table>
-          <small className="mx-3 my-2 text-dark"><b>Last update:</b> 11:00 AM February 24, 2023</small>
+          <small className="mx-3 my-2 text-dark">
+            <b>Last update:</b> 11:00 AM February 24, 2023
+          </small>
         </TableContainer>
       </Container>
     </>

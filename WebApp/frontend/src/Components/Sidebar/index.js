@@ -11,16 +11,19 @@ import avatar from "../../Assets/Image/avatar.webp";
 
 import "react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function Sidebar() {
   const [showMenu, setShowMenu] = useState(true);
+  const currentParams = useSelector(
+    (state) => state.enviromentParams.enviromentParams
+  );
   const navigate = useNavigate();
-  const location = useLocation();
-  //   if (!showMenu) {
-  //     document.querySelector(':root').style.setProperty('--sidebar-width', 0);
-  //   } else {
-  //     document.querySelector(':root').style.setProperty('--sidebar-width', 288);
-  // }
+  const kFormatter = (num) => {
+    return Math.abs(num) > 999
+      ? Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + "k"
+      : Math.sign(num) * Math.abs(num);
+  };
   return (
     <Fragment>
       {showMenu && (
@@ -51,15 +54,20 @@ function Sidebar() {
           <div className="p-4 d-flex flex-wrap justify-content-between text-center">
             <div className="">
               <FaTemperatureHigh color="#E9652D" size={24} />
-              <p className="mt-1">32 (ºC)</p>
+              <p className="mt-1">{currentParams[0].value} (ºC)</p>
             </div>
             <div className="mx-2">
-              <BsMoisture color="#0E9CFF" size={24} />
-              <p className="mt-1">80 (%)</p>
+              <MdOutlineLightMode color="#FFD600" size={24} />
+              <p className="mt-1">{currentParams[1].value} (LUX)</p>
             </div>
             <div>
-              <MdOutlineLightMode color="#FFD600" size={24} />
-              <p className="mt-1">500 (LUX)</p>
+              <BsMoisture color="#0E9CFF" size={24} />
+              <p className="mt-1">
+                {currentParams[2].value > 10000
+                  ? kFormatter(currentParams[2].value)
+                  : currentParams[2].value}{" "}
+                (%)
+              </p>
             </div>
           </div>
 
@@ -68,19 +76,17 @@ function Sidebar() {
           <Navigation
             // you can use your own router's api to get pathname
             activeItemId="/dashboard"
-            onSelect={({ itemId }) => {
+            onSelect={({ itemId, index }) => {
               navigate(itemId);
             }}
             items={[
               {
                 title: "Dashboard",
                 itemId: "/dashboard",
-                // you can use your own custom Icon component as well
-                // icon is optional
+
                 elemBefore: () => (
                   <AiOutlineHome color="var(--primary)" size={24} />
                 ),
-               
               },
               {
                 title: "Devices",
@@ -96,14 +102,15 @@ function Sidebar() {
                 elemBefore: () => (
                   <BsCalendarDate color="var(--primary)" size={24} />
                 ),
-                subNav: [ // Sử dụng nếu có menu con
+                subNav: [
+                  // Sử dụng nếu có menu con
                   {
-                    title: 'Water plan',
-                    itemId: '/waterplan',
+                    title: "Water plan",
+                    itemId: "/waterplan",
                   },
                   {
-                    title: 'Light plan',
-                    itemId: '/lightplan',
+                    title: "Light plan",
+                    itemId: "/lightplan",
                   },
                 ],
               },
