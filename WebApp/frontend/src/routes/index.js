@@ -7,6 +7,7 @@ import Login from "../Pages/Login"
 import LoginLayout from "../Layouts/LoginLayout"
 import Register from "../Pages/Register"
 import Devices from "../Pages/Devices"
+import Threshold from "../Pages/Threshold"
 
 export const routes = [
     {
