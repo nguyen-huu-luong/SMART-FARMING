@@ -11,6 +11,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { io } from 'socket.io-client';
 
 import {
   Chart as ChartJS,
@@ -129,6 +130,12 @@ const rows = [
   createData("This month", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
 ];
 function Dashboard() {
+  var socket = io("http://localhost:3003");
+  socket.on("Update", (data) => {
+    console.log(data)
+    console.log("haha")
+  })
+
   return (
     <>
       <Container className="p-4 d-flex flex-column w-100 gap-2 h-100">
