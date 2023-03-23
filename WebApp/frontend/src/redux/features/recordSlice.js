@@ -5,7 +5,6 @@ import * as api from "../api";
 export const getEnviromentParams = createAsyncThunk(
   "/records",
   async (_, { rejectWithValue }) => {
-    console.log("hello");
     try {
       const respone = await api.getRecords();
       return respone.data;

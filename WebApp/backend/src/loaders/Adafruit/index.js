@@ -5,7 +5,6 @@ let client = mqtt.connect(
   8883
 );
 let Record = require("../../models/records.model").model;
-let socketIo = require('../../app')
 
 exports.adafruit = (socketIo) => {
   client.on("connect", function () {
@@ -17,7 +16,6 @@ exports.adafruit = (socketIo) => {
   client.on("message", async function (topic, message) {
     if (topic == "vuonglht/feeds/cambien1") {
       let record = new Record({ value: message, type: "Temp", dev_id: 100, createAt: new Date()});
-      console.log("Nhận được dữ liẹue");
       try {
         await record.save();
         socketIo.emit("CollectTemperature", {value: record.value, createAt: record.createAt});
