@@ -13,7 +13,7 @@ const LightPlan = () => {
   }, []);
   let rec = moment(time).format('h:mm A, dddd, MMMM Do YYYY');
 
-  const [status, setStatus] = useState(0)
+  const [status, setStatus] = useState(2)
   const [ids, setIds] = useState(0)
   const radioHandler = (status) => {
     setStatus(status);

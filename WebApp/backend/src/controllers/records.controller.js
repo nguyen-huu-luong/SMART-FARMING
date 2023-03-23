@@ -10,3 +10,11 @@ exports.getOne = () => async (req, res, next) => {
         console.log(err)
     }
 }
+exports.getAll = () => async (req, res, next) => {
+    try {
+        let data = await record.find({}).sort({createAt:-1})
+        res.send(data)
+    } catch(err){
+        console.log(err)
+    }
+}
