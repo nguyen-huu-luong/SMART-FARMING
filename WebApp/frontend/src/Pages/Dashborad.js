@@ -1,6 +1,6 @@
 import moment from "moment";
 import StatusBar from "../Components/StatusBar";
-import { Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import { AiFillDownCircle, AiFillUpCircle } from "react-icons/ai";
 import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineCalendar } from "react-icons/ai";
@@ -28,8 +28,14 @@ import {
 import { Chart } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
 import { useDispatch, useSelector } from "react-redux";
-import { getEnviromentParams, updateHumidity, updateLight, updateTemperature } from "../redux/features/recordSlice";
-import { getUnit } from "../helper/helper";
+import {
+  getEnviromentParams,
+  updateHumidity,
+  updateLight,
+  updateTemperature,
+} from "../redux/features/recordSlice";
+import { getColor, getUnit } from "../helper/helper";
+import { Box, Tabs, Tab } from "@mui/material";
 
 ChartJS.register(
   LinearScale,
@@ -52,6 +58,7 @@ const labels = [
   "16 March",
 ];
 
+// fake chart data
 const data = {
   labels,
   datasets: [
@@ -75,34 +82,20 @@ const data = {
   ],
 };
 
-// let enviromentParams = [
-//   {
-//     type: "Temperature",
-//     value: 37,
-//     unit: "°C",
-//     compare: -2,
-//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-//   },
-//   {
-//     type: "Soil humidity",
-//     value: 75,
-//     unit: "%",
-//     compare: 15,  
-//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-//   },
-//   {
-//     type: "Light",
-//     value: 1800,
-//     unit: "LUX",
-//     compare: 34,
-//     lastUpdated: moment(new Date()).format("h:mm A, MMMM Do YYYY"),
-//   },
-// ];
+//fake data
+function createData(title, temperature, soil, light) {
+  return { title, temperature, soil, light };
+}
+
+const rows = [
+  createData("Today", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
+  createData("This week", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
+  createData("This month", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
+];
+
 function DataBox({ data }) {
-  if (data === {}) return <></> 
-  let color = "#0E9CFF";
-  if (data.type === "Temp") color = "#E9652D";
-  else if (data.type === "Light") color = "#FFD600";
+  if (data === {}) return <></>;
+  let color = getColor(data.type);
   return (
     <Col
       className="bg-white shadow p-3"
@@ -124,54 +117,61 @@ function DataBox({ data }) {
             <AiFillDownCircle size={24} color={color} />
           </span>
         )}
-        <span className="ms-2">{data.compare ? Math.abs(data.compare).toFixed(2): 0 + ` (${getUnit(data.type)})`}</span>
+        <span className="ms-2">
+          {data.compare
+            ? Math.abs(data.compare).toFixed(2)
+            : 0 + ` (${getUnit(data.type)})`}
+        </span>
       </div>
-      <span>{"Last update: " + moment(data.createAt).format("h:mm:ss A, MMMM Do YYYY")}</span>
+      <span>
+        {"Last update: " +
+          moment(data.createAt).format("h:mm:ss A, MMMM Do YYYY")}
+      </span>
     </Col>
   );
 }
 
-function createData(title, temperature, soil, light) {
-  return { title, temperature, soil, light };
-}
-
-const rows = [
-  createData("Today", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-  createData("This week", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-  createData("This month", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-];
+// main compoent
 function Dashboard() {
-  const {enviromentParams} = useSelector(state => ({...state.enviromentParams}))
-  const dispatch = useDispatch()
+  const { enviromentParams } = useSelector((state) => ({
+    ...state.enviromentParams,
+  }));
+  const dispatch = useDispatch();
   const socketRef = useRef();
-  console.log("re-render")
-  // get initial enviroment parameters
-  useEffect(() => {
-    dispatch(getEnviromentParams())
-  }, [])
+  const [value, setValue] = useState("one");
+  const [rangeTime, setRangeTime] = useState({
+    from: new Date(),
+    to: new Date(),
+  });
+
+  console.log(moment.utc(rangeTime.from).format("hh-mm"))
+  console.log("re-render", enviromentParams);
 
   useEffect(() => {
     // connect to host
-    socketRef.current = socketIOClient.connect(host)
+    socketRef.current = socketIOClient.connect(host);
 
     // handle when received data from socket server
     socketRef.current.on("CollectTemperature", (data) => {
-      dispatch(updateTemperature(data))
-    }); 
+      dispatch(updateTemperature(data));
+    });
     socketRef.current.on("CollectLight", (data) => {
-      
-     dispatch(updateLight(data))
-    }); 
+      dispatch(updateLight(data));
+    });
     socketRef.current.on("CollectHumidity", (data) => {
-     dispatch(updateHumidity(data))
-    }); 
-    
+      dispatch(updateHumidity(data));
+    });
+
     // disconnect to socket server
     return () => {
       socketRef.current.disconnect();
-    }; 
+    };
   }, []);
-  
+
+  const handleChange = (e, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <>
       <Container className="p-4 d-flex flex-column w-100 gap-2 h-100">
@@ -185,54 +185,89 @@ function Dashboard() {
           <div className="d-flex align-items-center justify-content-between">
             <h6 className="m-0">Temperature and soil humidity history</h6>
             <div>
-              <AiOutlineCalendar color="#E9652D" size={24} />
+              {/* <AiOutlineCalendar color="#E9652D" size={24} />
               <select className="border-0 btn btn">
                 <option>Past 12 hours</option>
                 <option>Past 24 hours</option>
                 <option>Today</option>
                 <option>The last 7 days</option>
                 <option>Choose time</option>
-              </select>
+              </select> */}
+              <Box sx={{ width: "100%" }}>
+                <Tabs value={value} onChange={handleChange}>
+                  <Tab value="one" label="Today" />
+                  <Tab value="two" label="Yesterday" />
+                  <Tab value="three" label="This month" />
+                  <Tab value="chooseday" label="Specific time" />
+                </Tabs>
+              </Box>
             </div>
           </div>
           <div className="d-flex">
-            <div style={{ width: "70%" }}>
-              <Chart type="bar" data={data} />
+            <div style={{ flex: 1 }}>
+              <Chart className="w-100" type="bar" data={data} />
             </div>
 
-            <div style={{ width: "30%" }} className="mt-5 p-4">
-              <div className="form-group">
-                <label htmlFor="fromdate" className="col-form-label">
-                  From: *
-                </label>
-                <input
-                  type="date"
-                  placeholder="dd-mm-yyyy"
-                  min={moment.utc(new Date()).format("YYYY-MM-DD")}
-                  className="form-control"
-                  id="fromdate"
-                  required
-                />
-                <div className="invalid-feedback">Choose a date</div>
-              </div>
+            {
+              <form style={{ width: "30%" }} className="mt-5 p-4">
+                <div className="form-group">
+                  <label htmlFor="fromdate" className="col-form-label">
+                    From: *
+                  </label>
+                  <input
+                    type="time"
+                    datetime = "hh-mm"
+                    defaultValue='00:00'
+                    // placeholder="dd-mm-yyyy"
+                    min={moment.utc(new Date()).format("YYYY-MM-DD")}
+                    className="form-control"
+                    id="fromdatetime"
+                    required
+                  />
 
-              <div className="form-group">
-                <label htmlFor="todate" className="col-form-label">
-                  To *
-                </label>
-                <div className="d-flex align-items-center">
+                  <input
+                    type="date"
+                    defaultValue={moment.utc(rangeTime.from).format("YYYY-MM-DD")}
+                    placeholder="dd-mm-yyyy"
+                    min={moment.utc(new Date()).format("YYYY-MM-DD")}
+                    className="form-control mt-1"
+                    id="fromdate"
+                    required
+                  />
+                  <div className="invalid-feedback">Choose a date</div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="todate" className="col-form-label">
+                    To *
+                  </label>
+                  <input
+                    type="time"
+                    datetime = 'hh:mm'
+                    defaultValue={moment(rangeTime.to).format("hh:mm")}
+                    placeholder="dd-mm-yyyy"
+                    className="form-control"
+                    id="totime"
+                    required
+                  />
+
                   <input
                     type="date"
                     placeholder="dd-mm-yyyy"
-                    min={moment.utc(new Date()).format("YYYY-MM-DD")}
-                    className="form-control"
+                    className="form-control mt-1"
                     id="todate"
+                    defaultValue={moment.utc(new Date()).format("YYYY-MM-DD")}
                     required
                   />
+                  <div className="invalid-feedback">Choose a date</div>
                 </div>
-                <div className="invalid-feedback">Choose a date</div>
-              </div>
-            </div>
+                {value == "chooseday" && (
+                  <button className="btn btn-primary my-2" type="submit">
+                    Confirm
+                  </button>
+                )}
+              </form>
+            }
           </div>
         </Row>
 

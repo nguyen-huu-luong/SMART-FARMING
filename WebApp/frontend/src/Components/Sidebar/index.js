@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import React from "react";
 import { Navigation } from "react-minimal-side-navigation";
 import { AiOutlineHome, AiOutlineCode, AiOutlineHistory } from "react-icons/ai";
@@ -11,13 +11,21 @@ import avatar from "../../Assets/Image/avatar.webp";
 
 import "react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getEnviromentParams } from "../../redux/features/recordSlice";
 
 function Sidebar() {
   const [showMenu, setShowMenu] = useState(true);
   const currentParams = useSelector(
     (state) => state.enviromentParams.enviromentParams
   );
+  const dispatch = useDispatch()
+
+
+  useEffect(() => {
+    if (!currentParams[0].value)
+      dispatch(getEnviromentParams())
+  }, [])
 
   const navigate = useNavigate();
   const kFormatter = (num) => {

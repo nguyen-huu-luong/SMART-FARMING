@@ -16,7 +16,6 @@ exports.adafruit = (socketIo) => {
   client.on("message", async function (topic, message) {
     if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`) {
       let record = new Record({ value: message, type: "Temp", dev_id: 100, createAt: new Date()});
-      console.log("Nhận được dữ liệu");
       try {
         await record.save();
         socketIo.emit("CollectTemperature", {value: record.value, createAt: record.createAt});
