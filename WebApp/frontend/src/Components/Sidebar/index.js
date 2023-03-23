@@ -91,7 +91,7 @@ function Sidebar() {
             items={[
               {
                 title: "Dashboard",
-                itemId: "/dashboard",
+                itemId: "/Dashboard",
 
                 elemBefore: () => (
                   <AiOutlineHome color="var(--primary)" size={24} />

@@ -8,13 +8,13 @@ let Record = require("../../models/records.model").model;
 
 exports.adafruit = (socketIo) => {
   client.on("connect", function () {
-    client.subscribe("vuonglht/feeds/cambien1"); // temp
-    client.subscribe("vuonglht/feeds/cambien2"); // light
-    client.subscribe("vuonglht/feeds/cambien3"); // humi
+    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`); // temp
+    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`); // light
+    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`); // humi
     console.log("Connect to adafruit success");
   });
   client.on("message", async function (topic, message) {
-    if (topic == "vuonglht/feeds/cambien1") {
+    if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`) {
       let record = new Record({ value: message, type: "Temp", dev_id: 100, createAt: new Date()});
       try {
         await record.save();
@@ -22,7 +22,7 @@ exports.adafruit = (socketIo) => {
       } catch (error) {
         console.log(error);
       }
-    } else if (topic == "vuonglht/feeds/cambien2") {
+    } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`) {
       let record = new Record({ value: message, type: "Light", dev_id: 101, createAt: new Date()});
       try {
         await record.save();
@@ -30,7 +30,7 @@ exports.adafruit = (socketIo) => {
       } catch (error) {
         console.log(error)
       }
-    } else if (topic == "vuonglht/feeds/cambien3") {
+    } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`) {
       let record = new Record({value: message, type: "Humi", dev_id: 102, createAt: new Date()});
       try {
         await record.save();

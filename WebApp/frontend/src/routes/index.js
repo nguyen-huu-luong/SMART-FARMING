@@ -8,7 +8,7 @@ import LoginLayout from "../Layouts/LoginLayout"
 import Register from "../Pages/Register"
 import Devices from "../Pages/Devices"
 import Threshold from "../Pages/Threshold"
-
+import History from "../Pages/History/history"
 export const routes = [
     {
         path: '/' , component: Home, layout: null
@@ -33,5 +33,8 @@ export const routes = [
     },
     {
         path: '/Threshold' , component: Threshold, layout: MainLayout
+    },
+    {
+        path: '/history' , component: History, layout: MainLayout
     }
 ]
