@@ -1,4 +1,5 @@
 import serial.tools.list_ports
+import extern
 
 def getPort():
     ports = serial.tools.list_ports.comports()
@@ -8,34 +9,35 @@ def getPort():
         port = ports[i]
         strPort = str(port)
         #print(strPort)
-        if "com0com" in strPort:
+        if "USB-SERIAL" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return commPort
+    return "COM6"
 
 try: 
     ser = serial.Serial( port=getPort(), baudrate=115200)
     print("Serial: ",ser)
+    
 except:
     print("Can not get port")
 
-def processData(client, data):
+def processData(data):
     data = data.replace("!", "")
     data = data.replace("#", "")
     splitData = data.split(":")
-    print(splitData)
+    #print(splitData)
     try:
         if splitData[1] == "TEMP":
-            client.publish("Temp_Sensor", splitData[2])
+            extern.temp = splitData[2]
         elif splitData[1] == "HUMI":
-            client.publish("Humi_Sensor", splitData[2])
+            extern.humi = splitData[2]
         elif splitData[1] == "LIGHT":
-            client.publish("Light_Sensor", splitData[2])
+            extern.light = splitData[2]
     except:
         pass
 
 mess = ""
-def readSerial(client):
+def readSerial():
     if getPort() == "None":
         return
 
@@ -43,11 +45,16 @@ def readSerial(client):
     if (bytesToRead > 0):
         global mess
         mess = mess + ser.read(bytesToRead).decode("UTF-8")
+        #if mess: print(mess)
         while ("#" in mess) and ("!" in mess):
             start = mess.find("!")
             end = mess.find("#")
-            processData(client, mess[start:end + 1])
+            processData(mess[start:end + 1])
             if (end == len(mess)):
                 mess = ""
             else:
                 mess = mess[end+1:]
+
+def writeSerial(commandToSend):
+    commandToSend
+    ser.write(str(commandToSend).encode())
