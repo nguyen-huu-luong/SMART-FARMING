@@ -7,37 +7,80 @@ let client = mqtt.connect(
 let Record = require("../../models/records.model").model;
 
 exports.adafruit = (socketIo) => {
+  socketIo.on("connection", (socket) => {
+    socket.on("toggleButton", (message) =>
+      client.publish(
+        `${process.env.ADAFRUIT_IO_USERNAME}/feeds/button${message.id}`,
+        message.value.toString(),
+        (err) => {
+          if (err) {
+            console.error(`Failed to publish message to feed: ${err}`);
+            return;
+          }
+          console.log(`Message published to feed`);
+        }
+      )
+    );
+  });
   client.on("connect", function () {
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`); // temp
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`); // light
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`); // humi
+    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`); // humi
     console.log("Connect to adafruit success");
   });
   client.on("message", async function (topic, message) {
     if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`) {
-      let record = new Record({ value: message, type: "Temp", dev_id: 100, createAt: new Date()});
+      let record = new Record({
+        value: message,
+        type: "Temp",
+        dev_id: 100,
+        createAt: new Date(),
+      });
       try {
         await record.save();
-        socketIo.emit("CollectTemperature", {value: record.value, createAt: record.createAt});
+        socketIo.emit("CollectTemperature", {
+          value: record.value,
+          createAt: record.createAt,
+        });
       } catch (error) {
         console.log(error);
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`) {
-      let record = new Record({ value: message, type: "Light", dev_id: 101, createAt: new Date()});
+      let record = new Record({
+        value: message,
+        type: "Light",
+        dev_id: 101,
+        createAt: new Date(),
+      });
       try {
         await record.save();
-        socketIo.emit("CollectLight", { value: record.value, createAt: record.createAt,});
+        socketIo.emit("CollectLight", {
+          value: record.value,
+          createAt: record.createAt,
+        });
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`) {
-      let record = new Record({value: message, type: "Humi", dev_id: 102, createAt: new Date()});
+      let record = new Record({
+        value: message,
+        type: "Humi",
+        dev_id: 102,
+        createAt: new Date(),
+      });
       try {
         await record.save();
-        socketIo.emit("CollectHumidity", { value: record.value, createAt: record.createAt});
+        socketIo.emit("CollectHumidity", {
+          value: record.value,
+          createAt: record.createAt,
+        });
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
+    } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`) {
+      console.log(message.toString());
+      socketIo.emit("receiveACk", JSON.parse(message));
     }
   });
 };

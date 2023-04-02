@@ -18,6 +18,12 @@ const startServer = async () => {
         origin: "http://localhost:3000",
       },
     });
+    socket.on("connection", (socket) => {
+      console.log("We have new connection !!!");
+      socket.on("disconnect", () => {
+        console.log("User has left !!!");
+      });
+    });
 
     console.log("Create socket");
     await load.loader(socket);
@@ -29,12 +35,6 @@ const startServer = async () => {
       })
     );
 
-    socket.on("connection", (socket) => {
-      console.log("We have new connection !!!");
-      socket.on("disconnect", () => {
-        console.log("User has left !!!");
-      });
-    });
 
     route(app);
     server.listen(process.env.PORT || 3003, () => {

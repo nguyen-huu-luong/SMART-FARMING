@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import React from "react";
 import { Navigation } from "react-minimal-side-navigation";
 import { AiOutlineHome, AiOutlineCode, AiOutlineHistory } from "react-icons/ai";
@@ -7,25 +7,58 @@ import { TbDeviceDesktop } from "react-icons/tb";
 import { BsMoisture } from "react-icons/bs";
 import { MdOutlineLightMode } from "react-icons/md";
 import { FaTemperatureHigh } from "react-icons/fa";
+import socketIOClient from "socket.io-client";
 import avatar from "../../Assets/Image/avatar.webp";
 
 import "react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getEnviromentParams } from "../../redux/features/recordSlice";
+import {
+  getEnviromentParams,
+  updateHumidity,
+  updateLight,
+  updateTemperature,
+} from "../../redux/features/recordSlice";
 
+const host = "http://localhost:3003";
 function Sidebar() {
   const [showMenu, setShowMenu] = useState(true);
-  const currentParams = useSelector(
-    (state) => state.enviromentParams.enviromentParams
-  );
-  const dispatch = useDispatch()
+  const socketRef = useRef();
 
+
+  const currentParams = useSelector(
+    (state) => state.records.enviromentParams
+  );
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!currentParams[0].value)
-      dispatch(getEnviromentParams())
-  }, [])
+    // connect to host
+    socketRef.current = socketIOClient.connect(host);
+
+    // handle when received data from socket server
+    socketRef.current.on("CollectTemperature", (data) => {
+      dispatch(updateTemperature(data));
+    });
+    socketRef.current.on("CollectLight", (data) => {
+      dispatch(updateLight(data));
+    });
+    socketRef.current.on("CollectHumidity", (data) => {
+      dispatch(updateHumidity(data));
+    });
+
+    socketRef.current.on("receiveACk", (mess) => {
+      console.log(mess)
+    })
+
+    // disconnect to socket server
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    if (!currentParams[0].value) 
+      dispatch(getEnviromentParams());
+  }, []);
 
   const navigate = useNavigate();
   const kFormatter = (num) => {
@@ -84,7 +117,7 @@ function Sidebar() {
 
           <Navigation
             // you can use your own router's api to get pathname
-            activeItemId = {document.location.pathname}
+            activeItemId={document.location.pathname}
             onSelect={({ itemId, index }) => {
               navigate(itemId);
             }}
