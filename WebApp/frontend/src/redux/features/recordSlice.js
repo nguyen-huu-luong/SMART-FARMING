@@ -9,6 +9,29 @@ export const getEnviromentParams = createAsyncThunk(
       const respone = await api.getRecords();
       return respone.data;
     } catch (error) {
+      return rejectWithValue(error.respone.data);
+    }
+  }
+);
+export const getRecordsData = createAsyncThunk(
+  "records/time",
+  async (time, { rejectWithValue }) => {
+    try {
+      const respone = await api.getRecordsData(time);
+      return respone.data;
+    } catch (error) {
+      return rejectWithValue(error.respone.data);
+    }
+  }
+);
+
+export const getAverageValues = createAsyncThunk(
+  "records/avarage",
+  async (_, { rejectWithValue }) => {
+    try {
+      const respone = await api.getAvgValues()
+      return respone.data
+    } catch (error) {
       return rejectWithValue(error.respone.data)
     }
   }
@@ -18,6 +41,8 @@ const recordSlice = createSlice({
   name: "record",
   initialState: {
     enviromentParams: [{}, {}, {}],
+    recordsData: null,
+    averageValues: [],
     error: "",
     loading: false,
   },
@@ -55,6 +80,28 @@ const recordSlice = createSlice({
       state.loading = false;
       state.error = action.payload.message;
     },
+
+    [getRecordsData.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getRecordsData.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.recordsData = action.payload;
+    },
+    [getRecordsData.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message;
+    },
+
+    [getAverageValues.pedding]: (state, action) => {state.loading = true},
+    [getAverageValues.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.averageValues = action.payload
+    },
+    [getAverageValues.rejected]: (state, action) => {
+      state.loading = false
+      state.error = action.payload.message;
+    }
   },
 });
 

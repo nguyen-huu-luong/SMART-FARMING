@@ -1,9 +1,8 @@
 import moment from "moment";
 import StatusBar from "../Components/StatusBar";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { AiFillDownCircle, AiFillUpCircle } from "react-icons/ai";
-import React, { useEffect, useRef, useState } from "react";
-import { AiOutlineCalendar } from "react-icons/ai";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,7 +10,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import socketIOClient from "socket.io-client";
 
 import {
   Chart as ChartJS,
@@ -26,16 +24,10 @@ import {
   BarController,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getEnviromentParams,
-  updateHumidity,
-  updateLight,
-  updateTemperature,
-} from "../redux/features/recordSlice";
 import { getColor, getUnit } from "../helper/helper";
 import { Box, Tabs, Tab } from "@mui/material";
+import { getAverageValues, getRecordsData } from "../redux/features/recordSlice";
 
 ChartJS.register(
   LinearScale,
@@ -48,50 +40,6 @@ ChartJS.register(
   LineController,
   BarController
 );
-const host = "http://localhost:3003";
-const labels = [
-  "11 March",
-  " 12 March",
-  " 13 March",
-  "14 March",
-  "15 March",
-  "16 March",
-];
-
-// fake chart data
-const data = {
-  labels,
-  datasets: [
-    {
-      type: "line",
-      label: "Temperature",
-      borderColor: "rgb(233, 101, 45)",
-      borderWidth: 2,
-      fill: false,
-      data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-    },
-    {
-      type: "bar",
-      label: "Soil humidity",
-      backgroundColor: "rgb(14, 156, 255)",
-      data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-      borderColor: "white",
-      maxBarThickness: 30,
-      borderWidth: 2,
-    },
-  ],
-};
-
-//fake data
-function createData(title, temperature, soil, light) {
-  return { title, temperature, soil, light };
-}
-
-const rows = [
-  createData("Today", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-  createData("This week", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-  createData("This month", "31.6(°C)", "72.5 (%)", "1810 (LUX)"),
-];
 
 function DataBox({ data }) {
   if (data === {}) return <></>;
@@ -133,45 +81,92 @@ function DataBox({ data }) {
 
 // main compoent
 function Dashboard() {
-  const { enviromentParams } = useSelector((state) => ({
-    ...state.enviromentParams,
+  const { enviromentParams, recordsData, averageValues } = useSelector((state) => ({
+    ...state.records,
   }));
   const dispatch = useDispatch();
-  const socketRef = useRef();
-  const [value, setValue] = useState("one");
-  const [rangeTime, setRangeTime] = useState({
-    from: new Date(),
-    to: new Date(),
-  });
-
-  console.log(moment.utc(rangeTime.from).format("hh-mm"))
-  console.log("re-render", enviromentParams);
-
-  useEffect(() => {
-    // connect to host
-    socketRef.current = socketIOClient.connect(host);
-
-    // handle when received data from socket server
-    socketRef.current.on("CollectTemperature", (data) => {
-      dispatch(updateTemperature(data));
-    });
-    socketRef.current.on("CollectLight", (data) => {
-      dispatch(updateLight(data));
-    });
-    socketRef.current.on("CollectHumidity", (data) => {
-      dispatch(updateHumidity(data));
-    });
-
-    // disconnect to socket server
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, []);
-
-  const handleChange = (e, newValue) => {
-    setValue(newValue);
+  const [time, setTime] = useState("today");
+  let data = {
+    labels: [],
+    datasets: [
+      {
+        type: "line",
+        label: "Temperature",
+        borderColor: "rgb(233, 101, 45)",
+        borderWidth: 2,
+        data: [],
+      },
+      {
+        type: "bar",
+        label: "Soil humidity",
+        backgroundColor: "rgb(14, 156, 255)",
+        data: [],
+        borderColor: "white",
+        maxBarThickness: 30,
+        borderWidth: 2,
+      },
+    ],
   };
 
+  useEffect(() => {
+    dispatch(getRecordsData(time));
+  }, [time]); 
+
+  useEffect(() => {
+    dispatch(getAverageValues())
+  }, [])
+
+  useEffect(() => {
+    let fromtime = document.forms["dashboard-chart-time"].fromtime
+    let fromdate = document.forms["dashboard-chart-time"].fromdate
+    let totime = document.forms["dashboard-chart-time"].totime
+    let todate = document.forms["dashboard-chart-time"].todate 
+    if (recordsData && time !== "chooseday") {
+      fromtime.value = moment(recordsData.from).format("HH:mm")
+      fromdate.value=moment(recordsData.from).format("YYYY-MM-DD")
+      totime.value = moment(recordsData.to).format("HH:mm")
+      todate.value=moment(recordsData.to).format("YYYY-MM-DD")
+      fromtime.disabled = true
+      fromdate.disabled = true
+      totime.disabled = true
+      todate.disabled = true
+    } else if (time === "chooseday") {
+      fromtime.disabled = false
+      fromdate.disabled = false
+      totime.disabled = false
+      todate.disabled = false
+    }
+    
+  }, [recordsData])
+
+  const handleChangeChartTime = (e, newValue) => {
+    setTime(newValue);
+  };
+
+  const handleSubmit = (e) => {
+      e.preventDefault() ;
+      let form = e.target
+      let fromdate = form.fromdate.value
+      let fromtime = form.fromtime.value
+      let todate = form.todate.value
+      let totime = form.totime.value
+      let from = `${fromdate} ${fromtime}`
+      let to = `${todate} ${totime}`
+      dispatch(getRecordsData(`range?from=${from}&to=${to}`));
+  }
+
+  if (recordsData) {
+    data.labels = recordsData.temperatureTime;
+    data.datasets[0].data = recordsData.temperature;
+    data.datasets[1].data = recordsData.humidity;
+
+    if (recordsData.is_avg_value) {
+      data.datasets[0].label = "Average Temperature";
+      data.datasets[1].label = "Average Soil humidity";
+    }
+  }
+
+  
   return (
     <>
       <Container className="p-4 d-flex flex-column w-100 gap-2 h-100">
@@ -185,19 +180,12 @@ function Dashboard() {
           <div className="d-flex align-items-center justify-content-between">
             <h6 className="m-0">Temperature and soil humidity history</h6>
             <div>
-              {/* <AiOutlineCalendar color="#E9652D" size={24} />
-              <select className="border-0 btn btn">
-                <option>Past 12 hours</option>
-                <option>Past 24 hours</option>
-                <option>Today</option>
-                <option>The last 7 days</option>
-                <option>Choose time</option>
-              </select> */}
               <Box sx={{ width: "100%" }}>
-                <Tabs value={value} onChange={handleChange}>
-                  <Tab value="one" label="Today" />
-                  <Tab value="two" label="Yesterday" />
-                  <Tab value="three" label="This month" />
+                <Tabs value={time} onChange={handleChangeChartTime}>
+                  <Tab value="today" label="Today" />
+                  <Tab value="yesterday" label="Yesterday" />
+                  <Tab value="week" label="This week" />
+                  <Tab value="month" label="This month" />
                   <Tab value="chooseday" label="Specific time" />
                 </Tabs>
               </Box>
@@ -208,28 +196,23 @@ function Dashboard() {
               <Chart className="w-100" type="bar" data={data} />
             </div>
 
-            {
-              <form style={{ width: "30%" }} className="mt-5 p-4">
+            { 
+              <form style={{ width: "30%" }} className="mt-5 p-4" id="dashboard-chart-time" onSubmit={(e) => handleSubmit(e)}>
                 <div className="form-group">
                   <label htmlFor="fromdate" className="col-form-label">
                     From: *
                   </label>
                   <input
                     type="time"
-                    datetime = "hh-mm"
-                    defaultValue='00:00'
-                    // placeholder="dd-mm-yyyy"
-                    min={moment.utc(new Date()).format("YYYY-MM-DD")}
+                    dateTime="hh-mm"
                     className="form-control"
-                    id="fromdatetime"
+                    id="fromtime"
                     required
                   />
 
                   <input
                     type="date"
-                    defaultValue={moment.utc(rangeTime.from).format("YYYY-MM-DD")}
                     placeholder="dd-mm-yyyy"
-                    min={moment.utc(new Date()).format("YYYY-MM-DD")}
                     className="form-control mt-1"
                     id="fromdate"
                     required
@@ -238,13 +221,12 @@ function Dashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="todate" className="col-form-label">
+                  <label htmlFor="totime" className="col-form-label">
                     To *
                   </label>
                   <input
                     type="time"
-                    datetime = 'hh:mm'
-                    defaultValue={moment(rangeTime.to).format("hh:mm")}
+                    datetime="hh:mm"
                     placeholder="dd-mm-yyyy"
                     className="form-control"
                     id="totime"
@@ -256,12 +238,11 @@ function Dashboard() {
                     placeholder="dd-mm-yyyy"
                     className="form-control mt-1"
                     id="todate"
-                    defaultValue={moment.utc(new Date()).format("YYYY-MM-DD")}
                     required
                   />
                   <div className="invalid-feedback">Choose a date</div>
                 </div>
-                {value == "chooseday" && (
+                {time === "chooseday" && (
                   <button className="btn btn-primary my-2" type="submit">
                     Confirm
                   </button>
@@ -291,18 +272,23 @@ function Dashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
-                <TableRow key={index} sx={{ "td,th,tr": { border: 0 } }}>
-                  <TableCell align="left">{row.title}</TableCell>
-                  <TableCell align="left">{row.temperature}</TableCell>
-                  <TableCell align="left">{row.soil}</TableCell>
-                  <TableCell align="left">{row.light}</TableCell>
-                </TableRow>
-              ))}
+              {
+                Object.entries(averageValues).reduce((acc, [key, value]) => {
+                  if (key !== "last_updated") 
+                      acc.push(( 
+                    <TableRow key = {acc.length} sx={{ "td,th,tr": { border: 0 } }}>
+                      <TableCell align="left">{key}</TableCell>
+                      <TableCell align="left">{value.temp}</TableCell>
+                      <TableCell align="left">{value.humi}</TableCell>
+                      <TableCell align="left">{value.light}</TableCell>
+                    </TableRow>))
+                   return acc ;
+                }, [])
+              }
             </TableBody>
           </Table>
           <small className="mx-3 my-2 text-dark">
-            <b>Last update:</b> 11:00 AM February 24, 2023
+            <b>Last update:</b>{' '}{moment(averageValues.last_updated).format('h:mm A, dddd, MMMM Do YYYY')}
           </small>
         </TableContainer>
       </Container>
