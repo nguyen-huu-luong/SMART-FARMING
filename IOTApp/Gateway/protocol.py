@@ -1,10 +1,12 @@
+"""Implementation of communication protocols"""
+
 NO_OF_RESEND    = 3     #maximum number of resending data
-ACK_TIMEOUT     = 3     #time that we wait for ack (seconds)
+ACK_TIMEOUT     = 3000  #time that we wait for ack
 
 #Cases in FSM
 SEND            = 100
 WAIT            = 200
-EXIT            = 300
+EXIT            = 400
 
 class stop_and_wait_ARQ(object):
     """Interface for stop and wait ARQ protocol.
@@ -19,14 +21,22 @@ class stop_and_wait_ARQ(object):
 
         """
         self.client     = client
-        self.buffer     = ""
+        self.buffer     = []
         self.resend     = 0
         self.case       = EXIT
         self.setTimer   = setTimer
         self.timer_flag = timer_flag
-        self.feed_id    = ""
+        self.receiver   = None
 
-    def publishData(self, feed_id, data):
+    def addData(self, data):
+        """Adding data that need to send to buffer"""
+        self.buffer.append(data)
+
+    def setReceiver(self, receiver):
+        """Set receiver"""
+        self.receiver = receiver
+
+    def sendData(self):
         """
         Whatever the data that sender wants to send, 
         he sends the data to the receiver. 
@@ -36,15 +46,18 @@ class stop_and_wait_ARQ(object):
         """
 
         if self.case == EXIT:
+            self.buffer.clear()
             return
         
         elif self.case == SEND:
+            if len(self.buffer) == 0:
+                print("Nothing to send")
+                return
+
             print("Sending data...")
-            self.client.publish(feed_id, data)
+            self.client.publish(self.receiver, self.buffer[0])
             self.case = WAIT
-            self.buffer = str(data)
             self.setTimer(ACK_TIMEOUT)
-            self.feed_id = feed_id
         
         elif self.case == WAIT:
             if self.timer_flag:
@@ -57,18 +70,21 @@ class stop_and_wait_ARQ(object):
                 self.resend += 1
                 self.case = SEND
 
-    def publishSuccess(self, feed_id, ack_data):
+    def sendSuccess(self, receiver, ack_data):
         """
         This function is used to detect if our data is published to server
         """
         if self.case == WAIT:
-            if self.feed_id == feed_id and ack_data == str(self.buffer):
-                print("Data has published: ", feed_id, ack_data)
-                self.case = EXIT
+            if self.receiver == receiver and ack_data == str(self.buffer[0]):
+                print("Data has published: ", receiver, ack_data)
+                self.case = SEND
                 self.resend = 0
-                self.buffer = ""
-                self.ack_data = None
+                self.buffer.pop(0)
 
-    @property
-    def initARQ(self):
+    def startSending(self):
+        """Start sending data to receiver"""
         self.case = SEND
+
+    def stopSending(self):
+        """Stop sending data to receiver"""
+        self.case = EXIT

@@ -1,6 +1,9 @@
-import extern
+"""Implementation of software timer"""
 
-TIMER_CYCLE = 1
+import extern
+from threading import Timer
+
+TIMER_CYCLE = 1000	#ms
 
 def setTimer0(duration):
 	"""Timer used for main fsm"""
