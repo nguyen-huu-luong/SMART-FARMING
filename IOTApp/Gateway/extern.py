@@ -21,3 +21,9 @@ timer4_flag     = 0
 temp            = 0
 light           = 0
 humi            = 0
+
+#Button response
+buttonResponse  = ()
+
+#Serial flag
+serial_flag     = 0

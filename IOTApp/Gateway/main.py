@@ -1,100 +1,85 @@
-import  time
-import  sys
-from    Adafruit_IO         import MQTTClient
-from    uart                import *
-from    protocol            import *
-from    software_timer      import *
-from    button_processing   import *
-
-AIO_FEED_IDs    = ["button1", "button2", "Temp_Sensor", "Light_Sensor", "Humi_Sensor", "ack"]
-AIO_USERNAME    = "triethoang"
-AIO_KEY         = "aio_chNI54RK6vvna3Rdr3IM52LcnMdF"
-BUTTON_IDs      = ["button1", "button2"]
-
-#Sensor ID
-TEMP_SENSOR     = 1
-LIGHT_SENSOR    = 2
-HUMI_SENSOR     = 3
-
-def connected(client):
-    print("Ket noi thanh cong ...")
-    for topic in AIO_FEED_IDs:
-        client.subscribe(topic)
-
-def subscribe(client , userdata , mid , granted_qos):
-    print("Subscribe thanh cong ...")
-
-def disconnected(client):
-    print("Ngat ket noi ...")
-    sys.exit (1)
-
-def message(client , feed_id , payload):
-    #print("Nhan du lieu: " + payload + " , feed id: " + feed_id)
-
-    if feed_id in BUTTON_IDs:
-        BUTTONs[feed_id].initARQ
-        BUTTONs[feed_id].setButton(payload)
-
-    elif feed_id == "ack":
-        splitACK = payload.split(":")
-        BUTTONs[splitACK[0]].button_processing(splitACK[1])
-    
-    else:
-        sensor_ARQ.publishSuccess(feed_id, payload)
-
-client = MQTTClient(AIO_USERNAME , AIO_KEY)
-client.on_connect = connected
-client.on_disconnect = disconnected
-client.on_message = message
-client.on_subscribe = subscribe
-client.connect()
-client.loop_background()
-
-#Initialize ARQ object
-sensor_ARQ          = stop_and_wait_ARQ(client, setTimer1, extern.timer1_flag)
-BUTTONs             = {}
-BUTTONs["button1"]  = Button(client, "button1", setTimer2, extern.timer2_flag)
-BUTTONs["button2"]  = Button(client, "button2", setTimer3, extern.timer3_flag)
+from    setup               import *
+from    threading           import Thread, Event
+#sys.path.append( '.' )
+#from    simpleAl.simpleAl   import *
 
 sensor_type         = "INIT"
-feed_id             = "INIT"
-sensor_data         = 0
-
-def main_fsm():
-    global sensor_type, feed_id, sensor_data
+def sensor_fsm():
+    """FSM for sending sensor data to server"""
+    global sensor_type
 
     if sensor_type == "INIT":
-        setTimer0(10)
-        sensor_type = TEMP_SENSOR
-        feed_id     = "Temp_Sensor"
-        sensor_data = extern.temp
+        setTimer0(PUBLISH_PERIOD)
+        sensor_type = HUMI_SENSOR
 
     elif extern.timer0_flag:
         if sensor_type == TEMP_SENSOR:
             sensor_type = LIGHT_SENSOR
-            feed_id     = "Light_Sensor"
+            topic       = "Light_Sensor"
             sensor_data = extern.light
 
         elif sensor_type == LIGHT_SENSOR:
             sensor_type = HUMI_SENSOR
-            feed_id     = "Humi_Sensor"
+            topic       = "Humi_Sensor"
             sensor_data = extern.humi
 
         elif sensor_type == HUMI_SENSOR:
             sensor_type = TEMP_SENSOR
-            feed_id     = "Temp_Sensor"
+            topic       = "Temp_Sensor"
             sensor_data = extern.temp
         
-        setTimer0(10)
-        sensor_ARQ.initARQ
+        sensor_ARQ.setReceiver(topic)
+        sensor_ARQ.addData(sensor_data)
+        sensor_ARQ.startSending()
+        setTimer0(PUBLISH_PERIOD)
 
-while True:
-    timer_run()
-    main_fsm()
-    readSerial()
-    sensor_ARQ.publishData(feed_id, sensor_data)
+event = Event()
+def readSerialBackground(event):
+    """Loop background for reading serial data"""
+    while not event.is_set():
+        readSerial()
+        if (extern.serial_flag):
+            client.publish("error", "Can not connect to MCU")
+            event.wait(3)
+        pass
 
-    for button in  BUTTON_IDs:
-        BUTTONs[button].send_ack()
+def nonBlockingInput(event):
+    """Reading input from console without blocking"""
+    while not event.is_set():
+        try:
+            ch = input()
+        except:
+            return
+        writeSerial(ch)
 
-    time.sleep(1)
+def publishData(event):
+    """Loop background for publishing data to Adafruit"""
+    while not event.is_set():
+        sensor_fsm()
+        #sensor_ARQ.sendData()
+
+def button_processing(event):
+    """Loop background for button processing"""
+    while not event.is_set():
+        for button in BUTTON_IDs:
+            BUTTONs[button].readSerial(extern.buttonResponse)
+            BUTTONs[button].send_ack()
+            event.wait(0.5)
+
+
+connectSerial()
+Thread(target=readSerialBackground, args=(event,)).start()
+Thread(target=publishData, args=(event,)).start()
+Thread(target=nonBlockingInput, args=(event,)).start()
+Thread(target=button_processing, args=(event,)).start()
+
+try:
+    while True:
+        timer_run()
+        event.wait(1)
+        pass
+        #image_detector()
+        
+except KeyboardInterrupt:
+    event.set()
+    sys.exit()
