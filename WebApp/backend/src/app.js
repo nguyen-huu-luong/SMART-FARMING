@@ -5,6 +5,9 @@ let load = require("./loaders/index");
 let socketServer = require('socket.io')
 let http = require('http');
 let route = require("../src/routers/index").route;
+let service = require("./services/schedule.service").scheduleService
+let client = require('socket.io-client')
+
 require("dotenv").config();
 
 const startServer = async () => {
@@ -24,7 +27,6 @@ const startServer = async () => {
         console.log("User has left !!!");
       });
     });
-
     console.log("Create socket");
     await load.loader(socket);
 
@@ -34,8 +36,9 @@ const startServer = async () => {
         credentials: true,
       })
     );
-
-
+    const clientIO = client.connect("http://localhost:3003")
+    // Schedule service
+    setInterval(() => service(clientIO), 1000);
     route(app);
     server.listen(process.env.PORT || 3003, () => {
       console.log("Connect to port", process.env.PORT);
