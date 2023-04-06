@@ -3,30 +3,69 @@ import ThresItem from "./thresItem"
 import Humidity from "../../Assets/Image/humidity.png"
 import Temp from "../../Assets/Image/temp.png"
 import Light from "../../Assets/Image/light.png"
-
-let datas = [{ image: Humidity, minValue: 3.5, maxValue: 4.0, name: "Humidity", color: "#1793ED" }, { image: Temp, minValue: 20, maxValue: 30, name: "Temperature", color: "#FE2F2F" }, { image: Light, minValue: 1600, maxValue: 1810, name: "Light", color: "#D65C28" }]
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { useState, useRef, useEffect } from "react"
+import { useDispatch, useSelector, } from "react-redux"
+import { getThreshold, updateThreshold } from "../../redux/features/thresholdSlice"
 
 const Threshold = () => {
+    const [show, setShow] = useState(false);
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (dataValue.userID == 0) {
+            dispatch(getThreshold(0))
+        }
+    }, [])
+
+    const dataValue = useSelector((state) => state.threshold)
+
+    const value = useRef([])
+    const handleClose = () => setShow(false);
+    const handleShow = (event) => {
+        event.preventDefault(true)
+        let data = {
+            minHumidity: value.current[0].value,
+            maxHumidity: value.current[1].value,
+            minTemperature: value.current[2].value,
+            maxTemperature: value.current[3].value,
+            minLight: value.current[4].value,
+            maxLight: value.current[5].value,
+            userID: 124
+        }
+        dispatch(updateThreshold(data))
+        setShow(true)
+    };
+
     return (
         <div className="container p-4 w-100" style={{ minHeight: "90vh" }}>
             <StatusBar title="Set threshold" />
             <div className="container p-3 py-5 my-2 mx-2 w-100 bg-white border rounded">
-                <form className="container" >
+                <form className="container" onSubmit={handleShow} >
                     <div className="container d-flex justify-content-around" >
-                        {
-                            datas.map((data) => {
-                                return (
-                                    <ThresItem item={data} />
-                                )
-                            })
-                        }
+                        <ThresItem name="Humidity" image={Humidity} color="#1793ED" minValue={{ min: 0, value: dataValue.thresValue[0].min }} maxValue={{ max: 1, value: dataValue.thresValue[0].max }} refer={value} />
+                        <ThresItem name="Temperature" image={Temp} color="#FE2F2F" minValue={{ min: 2, value: dataValue.thresValue[1].min }} maxValue={{ max: 3, value: dataValue.thresValue[1].max }} refer={value} />
+                        <ThresItem name="Light" image={Light} color="#D65C28" minValue={{ min: 4, value: dataValue.thresValue[2].min }} maxValue={{ max: 5, value: dataValue.thresValue[2].max }} refer={value} />
                     </div>
                     <div className="text-center pt-5">
-                        <button type="submit" className="py-1 fs-4 btn btn-success px-3 mt-2">Save change</button>
+                        <button type="submit" className="py-1 fs-4 btn btn-success px-3 mt-2" >Save change</button>
                     </div>
                 </form>
             </div>
+            <Modal show={show} onHide={handleClose} dialogClassName="w-25">
+                <Modal.Body className="mt-3 d-flex justify-content-center">Are you sure ?</Modal.Body>
+                <Modal.Footer className="border-0 w-75 m-auto d-flex justify-content-between">
+                    <Button variant="danger px-4" onClick={handleClose}>
+                        Yes
+                    </Button>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
+
     )
 }
 

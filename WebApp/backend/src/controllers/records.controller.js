@@ -260,6 +260,36 @@ exports.getAvegareValues = async(req, res, next) => {
   }
 }
 
+exports.getTemp = async () => {
+    try{
+        let temperature = await record.find({type: "Temp"}).sort({createAt:-1}).limit(1)
+        return temperature
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
+exports.getLight = async () => {
+    try{
+        let light = await record.find({type: "Light"}).sort({createAt:-1}).limit(1)
+        return light
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
+exports.getHumi = async () => {
+    try{
+        let humi = await record.find({type: "Humi"}).sort({createAt:-1}).limit(1)
+        return humi
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
 /*
   {
     today: {

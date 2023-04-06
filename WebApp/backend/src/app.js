@@ -18,7 +18,7 @@ const startServer = async () => {
 
     let socket = socketServer(server, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: '*',
       },
     });
     socket.on("connection", (socket) => {
