@@ -26,6 +26,7 @@ const recordSlice = createSlice({
       let newData = state.enviromentParams;
       newData[0].compare = action.payload.value - newData[0].value;
       newData[0].value = action.payload.value;
+      newData[0].createAt = action.payload.createAt ;
       state = { ...state, enviromentParams: newData };
     },
 
@@ -33,6 +34,7 @@ const recordSlice = createSlice({
       let newData = state.enviromentParams;
       newData[1].compare = action.payload.value - newData[1].value;
       newData[1].value = action.payload.value;
+      newData[1].createAt = action.payload.createAt ;
       state = { ...state, enviromentParams: newData };
     },
 
@@ -40,6 +42,7 @@ const recordSlice = createSlice({
       let newData = state.enviromentParams;
       newData[2].compare = action.payload.value - newData[2].value;
       newData[2].value = action.payload.value;
+      newData[2].createAt = action.payload.createAt ;
       state = { ...state, enviromentParams: newData };
     },
   },

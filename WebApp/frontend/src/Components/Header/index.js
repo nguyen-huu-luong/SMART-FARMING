@@ -5,15 +5,50 @@ import Popper from "../Popper";
 import { Fragment } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom"
+import Notify from "../Notify";
+import socketIOClient from 'socket.io-client';
+import { useEffect, useRef} from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { getNotify, decrement, setCheck } from "../../redux/features/notifySlide";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+ let data = [{ title: "Humidity is great than threshold", content: "Turn off pump", view: false }, { title: "Humidity is great than threshold", content: "Turn off pump", view: true }]
+const host = "http://localhost:3003"
 
 function Header() {
-  let numNotify = 70;
+  const socketRef = useRef();
+  const dispatch = useDispatch()
+  useEffect(() => {
+    socketRef.current = socketIOClient.connect(host)
+    dispatch(getNotify(0)) 
+    socketRef.current.on("Threshold", () => {
+        dispatch(getNotify(0))  
+    })
+
+  }, [])
+
+  const dataAll = useSelector(state => state.notify)
+  const data = dataAll.data
+  let numNotify = dataAll.countAfter
+  console.log(numNotify)
+  const notify = () => {
+    toast("New notify", { autoClose: 5000 });
+  }
+  
   return (
     <div
       className="w-100 position-fixed d-flex justify-content-between align-items-center px-5 bg-white py-1 shadow-sm"
       style={{ height: "var(--header-height)" }}
     >
       <img src={logo} />
+      {/* {
+        dataAll.checkLoad
+        ? <> {notify() } 
+       <ToastContainer limit={1}  /> {dispatch(setCheck())} </>
+        : <>  </>
+      } */}
+      <ToastContainer limit={1}  />
       <div className="d-flex align-items-center">
         <Popper
           toggle={
@@ -38,12 +73,20 @@ function Header() {
             </Fragment>
           }
         >
-          Hiển thị danh sách thông báo ở đây
+          {/* <div>Hiển thị danh sách thông báo ở đây</div> */}
+          <div  style={{maxHeight: "310px", overflowY: "auto", overflowX: "hidden"}}>
+          { 
+            data.map((item) => {
+              return (<Notify item={item} />)
+            })
+          }
+          </div>
+
         </Popper>
         <Tooltip title="Logout" arrow>
-        <Link to="/">  <IconButton color="default" className="bg-white text-dark">
-          <AiOutlineLogout size={32} />
-          </IconButton> </Link> 
+          <Link to="/">  <IconButton color="default" className="bg-white text-dark">
+            <AiOutlineLogout size={32} />
+          </IconButton> </Link>
         </Tooltip>
       </div>
     </div>
