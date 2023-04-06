@@ -1,13 +1,19 @@
 import {configureStore} from '@reduxjs/toolkit';
 import recordReducer from './features/recordSlice'
 import allRecSlice from './features/allRecSlice';
+import deviceSlice from './features/deviceSlice';
+import userActivitySlice from './features/userActivitySlice';
+import scheduleSlice from './features/scheduleSlice';
 import thresholdSlice from './features/thresholdSlice';
 import notifySlide from './features/notifySlide';
 
 export default configureStore({
     reducer: {
-        enviromentParams: recordReducer,
+        records: recordReducer,
         datas:  allRecSlice,
+        devices: deviceSlice,
+        data: userActivitySlice,
+        schedule: scheduleSlice,
         threshold:  thresholdSlice,
         notify: notifySlide
     },

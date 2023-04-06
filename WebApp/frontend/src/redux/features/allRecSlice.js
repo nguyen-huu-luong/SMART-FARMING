@@ -4,7 +4,6 @@ import * as api from "../api";
 export const getAllRecs = createAsyncThunk(
     "/allrecs",
     async (_, { rejectWithValue }) => {
-      console.log("Get all record");
       try {
         const respone = await api.getAllRecords();
         return respone.data;
@@ -16,7 +15,7 @@ export const getAllRecs = createAsyncThunk(
   const allRecSlice = createSlice({
     name: "allrecords",
     initialState:{
-      datas: [],
+      datas: [{}],
       loading: false
     },
     extraReducers:{

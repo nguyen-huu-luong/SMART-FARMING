@@ -13,7 +13,7 @@ import { getNotify, decrement, setCheck } from "../../redux/features/notifySlide
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
- let data = [{ title: "Humidity is great than threshold", content: "Turn off pump", view: false }, { title: "Humidity is great than threshold", content: "Turn off pump", view: true }]
+ 
 const host = "http://localhost:3003"
 
 function Header() {
@@ -22,7 +22,7 @@ function Header() {
   useEffect(() => {
     socketRef.current = socketIOClient.connect(host)
     dispatch(getNotify(0)) 
-    socketRef.current.on("Threshold", () => {
+    socketRef.current.on("receiveACk", () => {
         dispatch(getNotify(0))  
     })
 

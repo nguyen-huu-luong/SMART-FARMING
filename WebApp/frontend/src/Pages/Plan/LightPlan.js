@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import moment from "moment/moment";
 import { BsExclamationCircle } from 'react-icons/bs'
+import { useDispatch, useSelector } from "react-redux";
+import { setSched, getLight, deleteSched, modifySched } from "../../redux/features/scheduleSlice";
+import ResponsivePagination from "react-responsive-pagination";
 
 const LightPlan = () => {
   const [time, setTime] = useState(new Date());
-  let curr = new Date()
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(new Date());
@@ -12,31 +14,48 @@ const LightPlan = () => {
     return () => clearInterval(interval);
   }, []);
   let rec = moment(time).format('h:mm A, dddd, MMMM Do YYYY');
-
   const [status, setStatus] = useState(2)
-  const [ids, setIds] = useState(0)
   const radioHandler = (status) => {
     setStatus(status);
   };
-  const list = []
-  const [idx, setIdx] = useState(1)
-  const [lists, setLists] = useState(list)
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    let temp =  moment(event.target[1].value,"HH:mm").format('LT')  + ', ' + moment(event.target[0].value).format("dddd, MMMM Do YYYY")
-    event.target[1].value = ""
-    event.target[0].value = ""
-    const newList = {
-      id: idx,
-      temp
-    }
-    setIdx(idx + 1)
-    setLists((prev) => {
-      return prev.concat(newList)
-    })
+  const [ids, setIds] = useState("")
+
+  //Send data
+  const dispatch = useDispatch()
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const data = e.target
+    let day = moment(data.date.value).format('YYYY-MM-DD') + ' ' + data.timeF.value
+    day = moment(day, 'YYYY-MM-DD HH:mm').format()
+    dispatch(setSched({
+      time: day,
+      weekly: data.weekly.checked,
+      type: "light"
+    }))
   }
-  const handleDelete = (i) => {
-    setLists(lists.filter((tmp) => tmp.id !== i));
+  // Delete data
+  const handleDelete = () => {
+    dispatch(deleteSched({ id: ids }))
+  }
+  // Weekly
+  const handleChange = (_id, weekly) => {
+    const rec = !weekly
+    dispatch(modifySched({ id: _id, weekly: rec }))
+  }
+  //Get data
+  const light = useSelector((state) => state.schedule.light)
+  useEffect(() => {
+    dispatch(getLight())
+  })
+  //Pagination
+  const [itemOffset, SetOffset] = useState({ offset: 0, current: 0 })
+  const itemPerPage = 6
+  const endOffset = itemOffset.offset + itemPerPage
+  const lights = light.slice(itemOffset.offset, endOffset)
+  const countPage = Math.ceil(light.length / itemPerPage)
+  const handelPagination = (event) => {
+    const newOffset = ((event - 1) * itemPerPage) % light.length  //event start from 1
+    SetOffset({ offset: newOffset, current: (event) })
   }
   return (
     <>
@@ -45,22 +64,27 @@ const LightPlan = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="title">
-                Choose time for turning the light on
+                Choose time for watering
               </h5>
               <button type="button" className="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
             </div>
-            <form className="was-validated" onSubmit={(e) => handleSubmit(e)}>
+            <form className="needs-validation" id="frm" onSubmit={(e) => { handleSubmit(e) }}>
               <div className="modal-body">
                 <div className="form-group">
                   <label htmlFor="date" className="col-form-label">Choose a date</label>
-                  <input type="date" placeholder="dd-mm-yyyy" min={moment.utc(curr).format('YYYY-MM-DD')} className="form-control" id="date" required />
+                  <input type="date" className="form-control" min={moment(time).format("YYYY-MM-DD")} defaultValue={moment(time).format("YYYY-MM-DD")} name="date" required />
                   <div className="invalid-feedback">Choose a date</div>
+                </div>
+                <div className="form-group form-check-inline">
+                  <label htmlFor="weekly" className="form-check-label">Weekly</label>
+                  <input className="form-check-input form-control" type="checkbox" name="weekly" id="weekly" />
                 </div>
                 <div className="form-group">
                   <label htmlFor="timeF" className="col-form-label">Choose time</label>
-                  <input type="time" placeholder="10:00" className="form-control" id="timeF" required />
+                  <input type="time" min={moment(time).format("HH:mm")} defaultValue={moment(time).format("HH:mm")} className="form-control" id="timeF" required />
                   <div className="invalid-feedback">Choose time</div>
                 </div>
+
                 <div className="modal-footer d-flex justify-content-around">
                   <button type="button" className="btn btn-secondary"
                     data-bs-dismiss="modal"
@@ -84,7 +108,8 @@ const LightPlan = () => {
             </div>
             <div className="modal-footer d-flex justify-content-around">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" style={{ backgroundColor: "grey", borderColor: "grey", width: "100px" }}>Hủy</button>
-              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={() => handleDelete(ids)} style={{ backgroundColor: "red", borderColor: "red", width: "100px" }}
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" style={{ backgroundColor: "red", borderColor: "red", width: "100px" }}
+                onClick={() => { handleDelete() }}
               >Xóa</button>
             </div>
           </div>
@@ -131,22 +156,38 @@ const LightPlan = () => {
               </tr>
             </thead>
             <tbody>
-              {lists.map((current) => (
-                <tr key={current.id} className="align-middle">
-                  <td> {current.temp} </td>
+              {lights.map((current) => (
+                <tr key={current._id} className="align-middle">
+                  <td> {moment(current.time).format('h:mm A, dddd, MMMM Do YYYY')} </td>
                   <td className="text-center">
-                    <input className="form-check-input" type="checkbox" name="weekly" id="weekly" />
+                    <input className="form-check-input" type="checkbox"
+                      name="weekly" id="weekly" defaultChecked={current.weekly}
+                      onChange={() => handleChange(current._id, current.weekly)} />
                   </td>
-                  <td className="text-end"><button type="button" className="btn btn-danger" data-bs-toggle="modal" onClick={() => setIds(current.id)}
-                    data-bs-target="#deleteDate">Delete</button>
+                  <td className="text-end"><button type="button" className="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteDate"
+                    onClick={() => { setIds(current._id) }}
+                  >Delete</button>
                   </td>
                 </tr>
               ))
               }
             </tbody>
           </table>
+          <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
+            <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
+              <p style={{ color: "#6C757D" }}>Hiển thị {lights.length} trong tổng {light.length} dữ liệu</p>
+            </div>
+            <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
+              <ResponsivePagination
+                current={itemOffset.current}
+                total={countPage}
+                onPageChange={handelPagination}
+              />
+            </div>
+          </div>
         </div>
-
       </div >
     </>
   );

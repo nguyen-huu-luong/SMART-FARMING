@@ -1,7 +1,8 @@
 import moment from "moment";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllRecs } from "../../redux/features/allRecSlice";
+import { getUserAct } from "../../redux/features/userActivitySlice";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,60 +10,57 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import socketIOClient from "socket.io-client";
-const host = "http://localhost:3003";
+import ResponsivePagination from "react-responsive-pagination";
 const device = (temp) => {
-    switch(temp){
+    switch (temp) {
         case "101":
             return "Temperature sensor"
-            break;
         case "102":
             return "Humidity sensor"
-            break;
         default:
             return "Light sensor"
     }
 }
-const temp = [{action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"}, 
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"},
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"},
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"},
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"},
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"},
-            {action: "Turn on the light", actor: "User", time: "10:56 PM, Wednesday, March 22nd 2023"}]
+const val = (temp) => {
+    switch (temp) {
+        case "Temp":
+            return "Temperature (°C)"
+        case "Humi":
+            return "Humidity (%)"
+        default:
+            return "Light (LUX)"
+    }
+}
 const History = () => {
     const [status, setStatus] = useState(1)
     const radioHandler = (status) => {
         setStatus(status);
     };
-    const dat = useSelector((state) => state.datas.datas)
-    const socketRef = useRef();
+    const time = new Date();
+    const useract = useSelector((state) => state.data.useract)
+    const dev = useSelector((state) => state.datas.datas)
     const dispatch = useDispatch()
     useEffect(() => {
         dispatch(getAllRecs())
-    }, [])
-    useEffect(() => {
-        // connect to host
-        socketRef.current = socketIOClient.connect(host)
-
-        // handle when received data from socket server
-        socketRef.current.on("CollectTemperature", (data) => {
-            dispatch(getAllRecs())
-        });
-        socketRef.current.on("CollectLight", (data) => {
-
-            dispatch(getAllRecs())
-        });
-        socketRef.current.on("CollectHumidity", (data) => {
-            dispatch(getAllRecs())
-        });
-
-        // disconnect to socket server
-        return () => {
-            socketRef.current.disconnect();
-        };
-    }, []);
-    const time = new Date();
+        dispatch(getUserAct())
+    }, [dispatch])
+    const [itemOffset, SetOffset] = useState({ offset: 0, current: 0 })
+    const itemPerPage = 6
+    const endOffset = itemOffset.offset + itemPerPage
+    const devs = dev.slice(itemOffset.offset, endOffset)
+    const countPage = Math.ceil(dev.length / itemPerPage)
+    const handelPagination = (event) => {
+        const newOffset = ((event - 1) * itemPerPage) % dev.length  //event start from 1
+        SetOffset({ offset: newOffset, current: (event) })
+    }
+    const [itemOffset1, SetOffset1] = useState({ offset: 0, current: 0 })
+    const endOffset1 = itemOffset1.offset + itemPerPage
+    const countPage1 = Math.ceil(useract.length / itemPerPage)
+    const useracts = useract.slice(itemOffset1.offset, endOffset1)
+    const handelPagination1 = (event) => {
+        const newOffset = ((event - 1) * itemPerPage) % useract.length  //event start from 1
+        SetOffset1({ offset: newOffset, current: (event) })
+    }
     return (
         <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
             <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 justify-content-between align-items-center" id="top-nav">
@@ -91,22 +89,22 @@ const History = () => {
                 style={{ display: status === 1 ? 'block' : 'none' }}>
                 <TableContainer component={Paper}
                 >
-                    <Table sx={{ minWidth: 650 } } aria-label="simple table">
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
                         <TableHead>
                             <TableRow>
-                                <TableCell align="right">Data</TableCell>
+                                <TableCell align="left">Data</TableCell>
                                 <TableCell align="right">Value</TableCell>
-                                <TableCell align="right">Device id</TableCell>
+                                <TableCell align="right">Device name</TableCell>
                                 <TableCell align="right">Time</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {dat.map((item) => (
+                            {devs.map((item) => (
                                 <TableRow
                                     key={item.name}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
-                                    <TableCell align="right">{item.type}</TableCell>
+                                    <TableCell align="left">{val(item.type)}</TableCell>
                                     <TableCell align="right">{item.value}</TableCell>
                                     <TableCell align="right">{device(item.dev_id)}</TableCell>
                                     <TableCell align="right">{moment.utc(item.createAt).format('h:mm A, dddd, MMMM Do YYYY')}</TableCell>
@@ -115,6 +113,18 @@ const History = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
+                    <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
+                        <p style={{ color: "#6C757D" }}>Hiển thị {devs.length} trong tổng {dev.length} dữ liệu</p>
+                    </div>
+                    <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
+                        <ResponsivePagination
+                            current={itemOffset.current}
+                            total={countPage}
+                            onPageChange={handelPagination}
+                        />
+                    </div>
+                </div>
             </div>
             <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 justify-content-between align-items-center" id="device"
                 style={{ display: status === 2 ? 'block' : 'none' }}>
@@ -128,19 +138,32 @@ const History = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {temp.map((item) => (
+                            {useracts.map((item) => (
                                 <TableRow
                                     key={item.name}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
                                     <TableCell>{item.action}</TableCell>
                                     <TableCell align="right">{item.actor}</TableCell>
-                                    <TableCell align="right">{item.time}</TableCell>
+                                    <TableCell align="right">{ moment(item.createdAt).format('h:mm A, dddd, MMMM Do YYYY')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
+                    <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
+                        <p style={{ color: "#6C757D" }}>Hiển thị {useracts.length} trong tổng {useract.length} dữ liệu</p>
+                    </div>
+                    <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
+                        <ResponsivePagination
+                            current={itemOffset1.current}
+                            total={countPage1}
+                            onPageChange={handelPagination1}
+                            maxWidth={5}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )

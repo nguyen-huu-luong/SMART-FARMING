@@ -1,140 +1,204 @@
 import { Col, Container, Row } from "react-bootstrap";
 import StatusBar from "../Components/StatusBar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getColor } from "../helper/helper";
 import { getUnit } from "../helper/helper";
 import lighton from "../Assets/Image/pic_bulbon.gif";
 import lightoff from "../Assets/Image/pic_bulboff.gif";
 import CustomizedSwitches from "../Components/IOSSwitch";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
-const inputDevices = [
-  {
-    id: 2134,
-    type: "Temp",
-    name: "Temperature sensor",
-    status: 1,
-    currentValue: 34,
-  },
-  {
-    id: 23131,
-    name: "Light sensor",
-    type: "Light",
-    status: 1,
-    currentValue: 34,
-  },
-  {
-    id: 42123,
-    type: "Humi",
-    name: "Soil humidity sensor",
-    status: 1,
-    currentValue: 34,
-  },
-];
-function Devices() {
-  const [light, setLight] = useState(false);
-  const [pump, setPump] = useState(false);
-  const [time, setTime] = useState(10000)
-  console.log('re-render')
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTime(time => time - 1000)
-    } , 1000) 
+import socketIOClient from "socket.io-client";
+import Spin from "../Components/Spin/spin";
+import {
+  getAllDevices,
+  updateDeviceStatus,
+} from "../redux/features/deviceSlice";
 
-    return () => clearTimeout(timer)
-  }, [time])
-  const { enviromentParams } = useSelector((state) => ({
-    ...state.enviromentParams,
-  }));
+const host = "http://localhost:3003";
+function Devices() {
+  const [waiting, setWaiting] = useState({ id: "", value: false });
+  const [time, setTime] = useState(10000);
+  const socketRef = useRef();
+  const dispatch = useDispatch();
+  const devices = useSelector((state) => state.devices.devices);
+  // console.log("re-render");
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setTime((time) => time - 1000);
+  //   }, 1000);
+
+  //   return () => clearTimeout(timer);
+  // }, [time]);
+  const handleToggle = (id, isCheck) => {
+    socketRef.current.emit("toggleButton", { id, value: isCheck ? 1 : 0 });
+    setWaiting({ id: id, value: true });
+  };
+
+  useEffect(() => {
+    dispatch(getAllDevices());
+  }, [dispatch]);
+  useEffect(() => {
+    // connect to host
+    socketRef.current = socketIOClient.connect(host);
+
+    socketRef.current.on("receiveACk", (message) => {
+      if (waiting.value) {
+        setWaiting((state) => ({ ...state, value: false }));
+        dispatch(updateDeviceStatus({ id: message.id, value: message.value }));
+      }
+    });
+
+    // disconnect to socket server
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [waiting,dispatch]);
   return (
     <Container className="p-4 d-flex flex-column w-100 h-100 align-items-center">
       <StatusBar title="IoT dashboard" />
-      <Row className="g-0 w-100 my-3">
-        {inputDevices.map((item, index) => (
-          <Col
-            md={4}
-            key={index}
-            className={
-              index > 0 && index < inputDevices.length - 1
-                ? "px-3 py-2"
-                : "py-2"
-            }
-          >
-            <div
-              className="bg-white shadow d-flex align-items-center rounded"
-              style={{
-                borderBottom: `3px solid ${getColor(item.type)}`,
-                borderRadius: 8,
-              }}
-            >
-              <img
-                src={require("../Assets/Image/sensor.png")}
-                style={{ transform: "scale(80%)" }}
-              />
-              <div className="ps-2">
-                <b>{`${item.name}`}</b>
-                <p className="my-2">
-                  Current value:{" "}
-                  <span style={{ color: getColor(item.type) }}>
-                    {index < 2 &&
-                      enviromentParams[index].value +
-                        ` (${getUnit(item.type)})`}
-                  </span>
-                </p>
-                <p>
-                  Status:{" "}
-                  <b className="color-primary">
-                    {item.status == 1 ? "Active" : "Disconected"}
-                  </b>
-                </p>
-              </div>
-            </div>
-          </Col>
-        ))}
-        <Col md={4} className="py-2">
-          <div className="p-3 bg-white shadow rounded">
-            <div className="d-flex">
-              <img src={light ? lighton : lightoff} />
-              <div className="ps-4">
-                <b>Light 1</b>
-                <p className="my-2">
-                Status: <b className="color-primary">{light ? "ON" : 'OFF'}</b>
-                </p>
-                <CustomizedSwitches
-                  handleToggle={(isCheck) => setLight(isCheck)}
-                />
-              </div>
-            </div>
-            <div className="d-flex align-items-center justify-content-between">
-              <p className="my-2">Remainfing time: </p>
-              <span>{moment(time).format("h : mm : ss")}</span>
-              <Link to = '/lightplan' className="btn text-success"><b>Change</b></Link>
-            </div>
-          </div>
-        </Col>
+      <Row className="g-0 w-100 mt-3 mb-2">
+        {devices
+          .filter((item) => item.type === "input")
+          .map(
+            (item, index) =>
+              item.type === "input" && (
+                <Col
+                  md={4}
+                  key={index}
+                  className={index % 3 === 1 ? "px-3 py-2" : "py-2"}
+                >
+                  <div
+                    className="bg-white shadow d-flex align-items-center rounded"
+                    style={{
+                      borderBottom: `3px solid ${getColor(item.type)}`,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <img
+                      src={require("../Assets/Image/sensor.png")}
+                      alt = "sensor"
+                      style={{ transform: "scale(80%)" }}
+                    />
+                    <div className="ps-2">
+                      <b>{`${item.name}`}</b>
+                      <p className="my-2">
+                        Current value:{" "}
+                        <span
+                          style={{ color: getColor(item.name.toLowerCase()) }}
+                        >
+                          {item.nearest_value +
+                            ` (${getUnit(item.name.toLowerCase())})`}
+                        </span>
+                      </p>
+                      <p>
+                        Status:{" "}
+                        <b className="color-primary">
+                          {item.status === 1 ? "Active" : "Disconected"}
+                        </b>
+                      </p>
+                    </div>
+                  </div>
+                </Col>
+              )
+          )}
+      </Row>
 
-        <Col md={4} className="py-2 ps-3">
-          <div className="p-3 bg-white shadow rounded">
-            <div className="d-flex">
-              <img width={"50%"} src={require('../Assets/Image/pump.jpg')} />
-              <div className="ps-4">
-                <b>Pump</b>
-                <p className="my-2">
-                  Status: <b className="color-primary">{pump ? "ON" : 'OFF'}</b>
-                </p>
-                <CustomizedSwitches
-                  handleToggle={(isCheck) => setPump(isCheck)}
-                />
-              </div>
-            </div>
-            <div className="d-flex align-items-center justify-content-between">
-              <p className="my-2">Remainfing time: </p>
-              <span>{moment(time).format("h : mm : ss")}</span>
-              <Link to = '/waterplan' className="btn text-success"><b>Change</b></Link>
-            </div>
-          </div>
-        </Col>
+      <Row className="g-0 w-100">
+        {devices
+          .filter((item) => item.type === "output")
+          .map((item, index) =>
+            item.name === "Light" ? (
+              <Col
+                md={4}
+                key={index}
+                className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
+              >
+                <div className="p-3 bg-white shadow rounded">
+                  <div className="d-flex">
+                    <img src={item.status === 1 ? lighton : lightoff}  alt="light"/>
+                    <div className="ps-4">
+                      <b>Light 1</b>
+                      <p className="my-2">
+                        Status:{" "}
+                        <b className="color-primary">
+                          {item.status === 1 ? "ON" : "OFF"}
+                        </b>
+                      </p>
+                      <CustomizedSwitches
+                        disabled={waiting.value}
+                        handleToggle={(isCheck) =>
+                          handleToggle(item.dev_id, isCheck)
+                        }
+                      />
+                      {waiting.value && waiting.id === item.dev_id && (
+                        <div className="d-flex align-items-center">
+                          <p className="color-primary my-0 me-2">
+                            {item.status === 0 ? "Turning on" : "Turning off"}
+                          </p>
+                          <Spin />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <p className="my-2">Remainfing time: </p>
+                    <span>{moment(time).format("h : mm : ss")}</span>
+                    <Link to="/lightplan" className="btn text-success">
+                      <b>Change</b>
+                    </Link>
+                  </div>
+                </div>
+              </Col>
+            ) : (
+              <Col
+                md={4}
+                key={index}
+                className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
+              >
+                <div className="p-3 bg-white shadow rounded">
+                  <div className="d-flex">
+                    <img
+                      width={"50%"}
+                      src={require("../Assets/Image/pump.jpg")}
+                      alt="pump"
+                    />
+                    <div className="ps-4">
+                      <b>Pump</b>
+                      <p className="my-2">
+                        Status:{" "}
+                        <b className="color-primary">
+                          {item.status === 1 ? "ON" : "OFF"}
+                        </b>
+                      </p>
+                      <CustomizedSwitches
+                        disabled={waiting.value}
+                        handleToggle={(isCheck) =>
+                          handleToggle(item.dev_id, isCheck)
+                        }
+                      />
+                      {waiting.value && waiting.id === item.dev_id && (
+                        <div className="d-flex align-items-center">
+                          <p className="color-primary my-0 me-2">
+                            {item.status === 0 ? "Turning on" : "Turning off"}
+                          </p>
+                          <Spin />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <p className="my-2">Remainfing time: </p>
+                    <span>{moment(time).format("h : mm : ss")}</span>
+                    <Link to="/waterplan" className="btn text-success">
+                      <b>Change</b>
+                    </Link>
+                  </div>
+                </div>
+              </Col>
+            )
+          )}
       </Row>
     </Container>
   );
