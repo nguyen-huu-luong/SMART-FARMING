@@ -9,7 +9,7 @@ import Notify from "../Notify";
 import socketIOClient from 'socket.io-client';
 import { useEffect, useRef} from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getNotify, decrement, setCheck } from "../../redux/features/notifySlide";
+import { getNotify, decrement, setCheck } from "../../redux/features/notifySlice";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,7 +22,7 @@ function Header() {
   useEffect(() => {
     socketRef.current = socketIOClient.connect(host)
     dispatch(getNotify(0)) 
-    socketRef.current.on("receiveACk", () => {
+    socketRef.current.on("receiveMess", () => {
         dispatch(getNotify(0))  
     })
 

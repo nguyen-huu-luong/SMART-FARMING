@@ -235,21 +235,32 @@ exports.getAvegareValues = async(req, res, next) => {
       }
     ])
 
+    let temp1 = today.find(item => item._id.type === "Temp")
+    let temp2 = week.find(item => item._id.type === "Temp")
+    let temp3 = month.find(item => item._id.type === "Temp")
+
+    let light1 = today.find(item => item._id.type === "Light")
+    let light2 = week.find(item => item._id.type === "Light")
+    let light3 = month.find(item => item._id.type === "Light")
+
+    let humi1 = today.find(item => item._id.type === "Humi")
+    let humi2 = week.find(item => item._id.type === "Humi")
+    let humi3 = month.find(item => item._id.type === "Humi")
     res.send({
       today: {
-        temp: today.find(item => item._id.type === "Temp").value,
-        light: today.find(item => item._id.type === "Light").value,
-        humi: today.find(item => item._id.type === "Humi").value
+        temp: temp1 ? temp1.value : 0.0,
+        light: light1 ? light1.value : 0.0,
+        humi: humi1 ? humi1.value : 0.0,
       },
       this_week: {
-        temp: week.find(item => item._id.type === "Temp").value,
-        light: week.find(item => item._id.type === "Light").value,
-        humi: week.find(item => item._id.type === "Humi").value
+        temp: temp2 ? temp2.value : 0.0,
+        light: light2 ? light2.value : 0.0,
+        humi: humi2 ? humi2.value : 0.0,
       },
       this_month: {
-        temp: month.find(item => item._id.type === "Temp").value,
-        light: month.find(item => item._id.type === "Light").value,
-        humi: month.find(item => item._id.type === "Humi").value
+        temp: temp3 ? temp3.value : 0.0,
+        light: light3 ? light3.value : 0.0,
+        humi: humi3 ? humi3.value : 0.0,
       },
       last_updated: new Date()
     })
@@ -290,35 +301,12 @@ exports.getHumi = async () => {
     }
 }
 
-/*
-  {
-    today: {
-      humi:
-      temp:
-      light: 
-    },
-    this_week: {
-      humi:
-      temp:
-      light:
-    },
-
-    this_month: {
-      humi:
-      temp:
-      light:
-    }
-
-    last_updated: 
-  }
-*/
-
 exports.createRandomData = async (req, res, next) => {
   let data = [];
   const DAY = 86400000
   const TIME_SLOT =  30000 // cứ 30 giây thêm 1 records, 1 ngày = 2880, 1 tháng = 30 ngày 86400 records
   // Số lượng records lớn có thể gây đứng máy :v 
-  const NUM_DAYS = 0 // Số ngày cần tạo dữ liệu
+  const NUM_DAYS = 5 // Số ngày cần tạo dữ liệu
   let date1 = new Date(new Date().getTime() - NUM_DAYS*DAY);
   date1.setHours(0, 0, 12, 0);
   let date2 = new Date(new Date().getTime() - NUM_DAYS*DAY);
@@ -350,7 +338,8 @@ exports.createRandomData = async (req, res, next) => {
 
   // Thêm records vô mongoDB bằng hàm dưới dây
   result = await record.insertMany(data).catch(err => console.log(err))
-  res.send([result]);
+  res.send([]);
   // res.send(data) // trong trường hợp muốn xem trước dữ liệu, 
                          //nếu thêm số lượng lớn thì kh nên chạy dòng này vì kết quả trả về có thể lên đến hàng triệu dòng :v
 };
+

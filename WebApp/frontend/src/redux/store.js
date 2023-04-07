@@ -5,7 +5,7 @@ import deviceSlice from './features/deviceSlice';
 import userActivitySlice from './features/userActivitySlice';
 import scheduleSlice from './features/scheduleSlice';
 import thresholdSlice from './features/thresholdSlice';
-import notifySlide from './features/notifySlide';
+import notifySlide from './features/notifySlice';
 
 export default configureStore({
     reducer: {

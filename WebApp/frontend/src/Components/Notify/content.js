@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { useState } from "react";
 
 import { useDispatch} from "react-redux";
-import { setView } from "../../redux/features/notifySlide";
+import { setView } from "../../redux/features/notifySlice";
 
 const Content = ({item}) => {
   

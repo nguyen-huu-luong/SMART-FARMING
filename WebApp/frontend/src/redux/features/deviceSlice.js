@@ -21,7 +21,7 @@ const deviceSlice = createSlice({
   reducers: {
     updateDeviceStatus: (state, action) => {
       let updatedDevices = state.devices.map((item) =>
-        item.dev_id == action.payload.id
+        item.publish_btn === action.payload.publish_btn
           ? { ...item, status: action.payload.value }
           : item
       );

@@ -18,8 +18,8 @@ import {
 
 const host = "http://localhost:3003";
 function Devices() {
-  const [waiting, setWaiting] = useState({ id: "", value: false });
-  const [time, setTime] = useState(10000);
+  const [waiting, setWaiting] = useState({ btn: "", value: false });
+  const [time, setTime] = useState(100);
   const socketRef = useRef();
   const dispatch = useDispatch();
   const devices = useSelector((state) => state.devices.devices);
@@ -31,9 +31,9 @@ function Devices() {
 
   //   return () => clearTimeout(timer);
   // }, [time]);
-  const handleToggle = (id, isCheck) => {
-    socketRef.current.emit("toggleButton", { id, value: isCheck ? 1 : 0 });
-    setWaiting({ id: id, value: true });
+  const handleToggle = (publish_btn, isCheck) => {
+    socketRef.current.emit("toggleButton", { publish_btn, value: isCheck ? 1 : 0 });
+    setWaiting({ btn: publish_btn, value: true });
   };
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function Devices() {
     socketRef.current.on("receiveACk", (message) => {
       if (waiting.value) {
         setWaiting((state) => ({ ...state, value: false }));
-        dispatch(updateDeviceStatus({ id: message.id, value: message.value }));
+        dispatch(updateDeviceStatus({ publish_btn: message.publish_btn, value: message.value }));
       }
     });
 
@@ -129,10 +129,10 @@ function Devices() {
                       <CustomizedSwitches
                         disabled={waiting.value}
                         handleToggle={(isCheck) =>
-                          handleToggle(item.dev_id, isCheck)
+                          handleToggle(item.publish_btn, isCheck)
                         }
                       />
-                      {waiting.value && waiting.id === item.dev_id && (
+                      {waiting.value && waiting.btn === item.publish_btn && (
                         <div className="d-flex align-items-center">
                           <p className="color-primary my-0 me-2">
                             {item.status === 0 ? "Turning on" : "Turning off"}
@@ -175,10 +175,10 @@ function Devices() {
                       <CustomizedSwitches
                         disabled={waiting.value}
                         handleToggle={(isCheck) =>
-                          handleToggle(item.dev_id, isCheck)
+                          handleToggle(item.publish_btn, isCheck)
                         }
                       />
-                      {waiting.value && waiting.id === item.dev_id && (
+                      {waiting.value && waiting.btn === item.publish_btn && (
                         <div className="d-flex align-items-center">
                           <p className="color-primary my-0 me-2">
                             {item.status === 0 ? "Turning on" : "Turning off"}
@@ -190,7 +190,7 @@ function Devices() {
                   </div>
                   <div className="d-flex align-items-center justify-content-between">
                     <p className="my-2">Remainfing time: </p>
-                    <span>{moment(time).format("h : mm : ss")}</span>
+                    <span>{moment(1).format("h : mm : ss")}</span>
                     <Link to="/waterplan" className="btn text-success">
                       <b>Change</b>
                     </Link>

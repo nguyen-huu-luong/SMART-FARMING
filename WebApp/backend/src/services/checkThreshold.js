@@ -3,28 +3,30 @@ let record = require('../controllers/records.controller')
 let notify = require('../controllers/notify.controller')
 require("dotenv").config();
 
-exports.LightTheshold = async (client, data, bt) => {
+exports.LightTheshold = async (client, data, bt,socketIo) => {
     try {
         let thres = await threshold.getLight()
         let maxValue = thres.maxValue
         let minValue = thres.minValue
         if (data < minValue) {
             if (bt == 0) {
-                client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "1")
+                //client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "1")
                 await notify.addNotify({title: "Light is less than threshold", content: "Turn on light"})
             }
             else {
                 await notify.addNotify({title: "Light is less than threshold", content: "None"})
             }
+            socketIo.emit("receiveMess")
         }
         else if (data > maxValue) {
             if (bt == 1) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "0")
-                await notify.addNotify({title: "Light is great than threshold", content: "Turn off light"})
+                await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light"})
             }
             else {
-                await notify.addNotify({title: "Light is great than threshold", content: "None"})
+                await notify.addNotify({title: "Light is greater than threshold", content: "None"})
             }
+            socketIo.emit("receiveMess")
         }
     }
     catch (err) {
@@ -32,7 +34,7 @@ exports.LightTheshold = async (client, data, bt) => {
     }
 }
 
-exports.HumiThreshold = async (client, data, bt) => {
+exports.HumiThreshold = async (client, data, bt, socketIo) => {
     try {
         let thresHumi = 0
         let thresTemp = 0
@@ -57,43 +59,48 @@ exports.HumiThreshold = async (client, data, bt) => {
         if (thresHumi >= minHumi && thresHumi <= maxHumi) {
             if (thresTemp > maxTemp) {
                 if (bt == 0) {
-                    client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
-                    await notify.addNotify({title: "Temp is great than threshold", content: "Turn on pump"})
+                    //client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
+
+                    await notify.addNotify({title: "Temp is greater than threshold", content: "Turn on pump"})
                 }
                 else {
-                    await notify.addNotify({title: "Temp is great than threshold", content: "None"})
+                    await notify.addNotify({title: "Temp is greater than threshold", content: "None"})
                 }
+                socketIo.emit("receiveMess")
             }
         }
         else if (thresHumi < minHumi) {
             if (thresTemp >= minTemp && thresTemp <= maxTemp) {
                 if (bt == 0) {
-                    client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
+                   // client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
                     await notify.addNotify({title: "Humidity is less than threshold", content: "Turn on pump"})
                 }
                 else {
                     await notify.addNotify({title: "Humidity is less than threshold", content: "None"})
                 }
+                socketIo.emit("receiveMess")
             }
         }
         else if (thresHumi > maxHumi) {
             if (thresTemp >= minTemp && thresTemp <= maxTemp) {
                 if (bt == 1) {
-                    client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
-                    await notify.addNotify({title: "Humidity is great than threshold", content: "Turn off pump"})
+                   // client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump"})
                 }
                 else {
-                    await notify.addNotify({title: "Humidity is great than threshold", content: "None"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None"})
                 }
+                socketIo.emit("receiveMess")
             }
             else if (thresTemp < minTemp) {
                 if (bt == 1) {
-                    client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
-                    await notify.addNotify({title: "Humidity is great than threshold", content: "Turn off pump"})
+                  //  client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump"})
                 }
                 else {
-                    await notify.addNotify({title: "Humidity is great than threshold", content: "None"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None"})
                 }
+                socketIo.emit("receiveMess")
             }
         }
     }
