@@ -2,7 +2,7 @@ let notify = require('../models/notify.model').model
 
 exports.addNotify = async (data) => {
     try{
-        let value = new notify({title: data.title, content: data.content, view: false})
+        let value = new notify({title: data.title, content: data.content, current1: data.current1, current2: data.current2, buttonStatus: data.buttonStatus ,view: false, type: data.type})
         await value.save()
     }
     catch(err){

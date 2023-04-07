@@ -15,6 +15,7 @@ const Threshold = () => {
 
     useEffect(() => {
         if (dataValue.userID == 0) {
+            console.log("Haha")
             dispatch(getThreshold(0))
         }
     }, [])
@@ -23,8 +24,7 @@ const Threshold = () => {
 
     const value = useRef([])
     const handleClose = () => setShow(false);
-    const handleShow = (event) => {
-        event.preventDefault(true)
+    const handelSubmit = () => {
         let data = {
             minHumidity: value.current[0].value,
             maxHumidity: value.current[1].value,
@@ -35,6 +35,10 @@ const Threshold = () => {
             userID: 124
         }
         dispatch(updateThreshold(data))
+        setShow(false);
+    }
+    const handleShow = (event) => {
+        event.preventDefault(true)
         setShow(true)
     };
 
@@ -56,7 +60,7 @@ const Threshold = () => {
             <Modal show={show} onHide={handleClose} dialogClassName="w-25">
                 <Modal.Body className="mt-3 d-flex justify-content-center">Are you sure ?</Modal.Body>
                 <Modal.Footer className="border-0 w-75 m-auto d-flex justify-content-between">
-                    <Button variant="danger px-4" onClick={handleClose}>
+                    <Button variant="danger px-4" onClick={ handelSubmit}>
                         Yes
                     </Button>
                     <Button variant="secondary" onClick={handleClose}>

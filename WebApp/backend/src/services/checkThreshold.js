@@ -11,22 +11,22 @@ exports.LightTheshold = async (client, data, bt,socketIo) => {
         if (data < minValue) {
             if (bt == 0) {
                 //client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "1")
-                await notify.addNotify({title: "Light is less than threshold", content: "Turn on light"})
+                await notify.addNotify({title: "Light is less than threshold", content: "Turn on light", buttonStatus: "Off", current1: data, current2: "" , type: 0})
             }
             else {
-                await notify.addNotify({title: "Light is less than threshold", content: "None"})
+                await notify.addNotify({title: "Light is less than threshold", content: "None", buttonStatus: "On", current1: data, current2: "", type: 0})
             }
-            socketIo.emit("receiveMess")
+            socketIo.emit("receiveMess", "Light is less than threshold")
         }
         else if (data > maxValue) {
             if (bt == 1) {
-                client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "0")
-                await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light"})
+                // client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "0")
+                await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light", buttonStatus: "On", current1: data, type: 0})
             }
             else {
-                await notify.addNotify({title: "Light is greater than threshold", content: "None"})
+                await notify.addNotify({title: "Light is greater than threshold", content: "None",  buttonStatus: "Off", current1: data, type: 0})
             }
-            socketIo.emit("receiveMess")
+            socketIo.emit("receiveMess", "Light is greater than threshold")
         }
     }
     catch (err) {
@@ -55,52 +55,51 @@ exports.HumiThreshold = async (client, data, bt, socketIo) => {
             thresHumi = thresHumi[0].value
             thresTemp = data.value
         }
-    
         if (thresHumi >= minHumi && thresHumi <= maxHumi) {
             if (thresTemp > maxTemp) {
                 if (bt == 0) {
                     //client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
 
-                    await notify.addNotify({title: "Temp is greater than threshold", content: "Turn on pump"})
+                    await notify.addNotify({title: "Temp is greater than threshold", content: "Turn on pump", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 }
                 else {
-                    await notify.addNotify({title: "Temp is greater than threshold", content: "None"})
+                    await notify.addNotify({title: "Temp is greater than threshold", content: "None", buttonStatus: "On", current1: thresHumi, current2: thresTemp, type:1})
                 }
-                socketIo.emit("receiveMess")
+                socketIo.emit("receiveMess", "Temp is greater than threshold")
             }
         }
         else if (thresHumi < minHumi) {
             if (thresTemp >= minTemp && thresTemp <= maxTemp) {
                 if (bt == 0) {
                    // client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
-                    await notify.addNotify({title: "Humidity is less than threshold", content: "Turn on pump"})
+                    await notify.addNotify({title: "Humidity is less than threshold", content: "Turn on pump", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 }
                 else {
-                    await notify.addNotify({title: "Humidity is less than threshold", content: "None"})
+                    await notify.addNotify({title: "Humidity is less than threshold", content: "None", buttonStatus: "On", current1: thresHumi, current2: thresTemp, type:1})
                 }
-                socketIo.emit("receiveMess")
+                socketIo.emit("receiveMess",  "Humidity is less than threshold")
             }
         }
         else if (thresHumi > maxHumi) {
             if (thresTemp >= minTemp && thresTemp <= maxTemp) {
                 if (bt == 1) {
                    // client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
-                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump", buttonStatus: "On", current1: thresHumi, current2: thresTemp, type:1})
                 }
                 else {
-                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 }
-                socketIo.emit("receiveMess")
+                socketIo.emit("receiveMess",  "Humidity is greater than threshold")
             }
             else if (thresTemp < minTemp) {
                 if (bt == 1) {
                   //  client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
-                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump", buttonStatus: "On", current1: thresHumi, current2: thresTemp, type:1})
                 }
                 else {
-                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None"})
+                    await notify.addNotify({title: "Humidity is greater than threshold", content: "None", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 }
-                socketIo.emit("receiveMess")
+                socketIo.emit("receiveMess", "Humidity is greater than threshold")
             }
         }
     }
