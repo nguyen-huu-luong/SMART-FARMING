@@ -60,10 +60,25 @@ exports.setThreshold = async (req, res, next) => {
 exports.updateThreshold = async (req, res, next) => {
     try {
         let thresValue = req.body
-        await threshold.updateOne({ typeThres: "Humidity" }, { minValue: thresValue.minHumidity, maxValue: thresValue.maxHumidity, userID: thresValue.userID })
-        await threshold.updateOne({ typeThres: "Temperature" }, { minValue: thresValue.minTemperature, maxValue: thresValue.maxTemperature,  userID: thresValue.userID })
-        await threshold.updateOne({ typeThres: "Light" }, { minValue: thresValue.minLight, maxValue: thresValue.maxLight, userID: thresValue.userID })
-        res.send("success")
+        let minHumi = parseFloat(thresValue.minHumidity)
+        let maxHumi = parseFloat(thresValue.maxHumidity)
+        let minTemp = parseFloat(thresValue.minTemperature)
+        let maxTemp = parseFloat(thresValue.maxTemperature)
+        let minLight = parseFloat(thresValue.minLight)
+        let maxLight = parseFloat(thresValue.maxLight)
+        if ( (minHumi > maxHumi) || (minTemp > maxTemp) || (minLight > maxLight)) {
+            res.status(400).send("Failed: Min value must less than or equal max value")
+        }
+        else if (maxHumi > 100) {
+            res.status(400).send("Failed: Max value of Humidity is 100%")
+
+        }
+        else {
+            await threshold.updateOne({ typeThres: "Humidity" }, { minValue: thresValue.minHumidity, maxValue: thresValue.maxHumidity, userID: thresValue.userID })
+            await threshold.updateOne({ typeThres: "Temperature" }, { minValue: thresValue.minTemperature, maxValue: thresValue.maxTemperature,  userID: thresValue.userID })
+            await threshold.updateOne({ typeThres: "Light" }, { minValue: thresValue.minLight, maxValue: thresValue.maxLight, userID: thresValue.userID })
+            res.send("success")
+        }
     }
     catch (err) {
         res.send("Err: ", err)

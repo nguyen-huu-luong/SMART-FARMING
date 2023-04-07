@@ -22,8 +22,9 @@ function Header() {
   useEffect(() => {
     socketRef.current = socketIOClient.connect(host)
     dispatch(getNotify(0)) 
-    socketRef.current.on("receiveMess", () => {
+    socketRef.current.on("receiveMess", (msg) => {
         dispatch(getNotify(0))  
+        toast.warn(msg);
     })
 
   }, [])
@@ -31,10 +32,7 @@ function Header() {
   const dataAll = useSelector(state => state.notify)
   const data = dataAll.data
   let numNotify = dataAll.countAfter
-  console.log(numNotify)
-  const notify = () => {
-    toast("New notify", { autoClose: 5000 });
-  }
+
   
   return (
     <div
@@ -42,13 +40,7 @@ function Header() {
       style={{ height: "var(--header-height)" }}
     >
       <img src={logo} />
-      {/* {
-        dataAll.checkLoad
-        ? <> {notify() } 
-       <ToastContainer limit={1}  /> {dispatch(setCheck())} </>
-        : <>  </>
-      } */}
-      <ToastContainer limit={1}  />
+      <ToastContainer />
       <div className="d-flex align-items-center">
         <Popper
           toggle={

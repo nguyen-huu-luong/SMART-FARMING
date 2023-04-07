@@ -23,6 +23,7 @@ export const updateThreshold = createAsyncThunk(
             await dispatch(getThreshold(0))
         }
         catch(err) {
+            alert(err.response.data)
             rejectWithValue(err.respone.data)
         }
     }
@@ -61,12 +62,13 @@ const thresholdSlice = createSlice({
             })
             .addCase(updateThreshold.fulfilled, (state, action) => {
                 state.loading = false
+                console.log("Update")
                 // let dispatch = useDispatch()
                 // dispatch(getThreshold(0))
             })
             .addCase(updateThreshold.rejected, (state, action) => {
                 state.loading = false
-                state.error = action.payload.message
+                // state.error = action.payload.message
             })
     }
 

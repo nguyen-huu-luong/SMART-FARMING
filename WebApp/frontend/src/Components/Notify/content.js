@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useDispatch} from "react-redux";
 import { setView } from "../../redux/features/notifySlice";
+import {AiFillWarning} from "react-icons/ai"
 
 const Content = ({item}) => {
   
@@ -28,10 +29,24 @@ const Content = ({item}) => {
   
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>{item.title}</Modal.Title>
+            <Modal.Title><span className='text-warning d-inline-block '><AiFillWarning size={40}/> </span> {item.title}</Modal.Title>
           </Modal.Header>
-          <Modal.Body><p>Action: {item.content}</p>
-          <p>Time: {formatedDate}</p>
+          <Modal.Body>{
+            item.type == 0 ?
+           <>
+           <p>Threshold time: {formatedDate}</p>
+           <p>Current value of light: {item.current1}</p>
+           <p>Light status: {item.buttonStatus}</p>
+           <p>Action advice: {item.content}</p>
+          </> 
+          :    <>
+          <p>Threshold time: {formatedDate}</p>
+          <p>Current value of Humidity: {item.current1}</p>
+           <p>Current value of Temperature: {item.current2}</p>
+           <p>Pump status: {item.buttonStatus}</p>
+           <p>Action advice: {item.content}</p>
+          </> 
+          }
           </Modal.Body>
 
         </Modal>
