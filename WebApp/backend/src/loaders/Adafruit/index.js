@@ -14,7 +14,7 @@ exports.adafruit = (socketIo) => {
   socketIo.on("connection", (socket) => {
     socket.on("toggleButton", (message) =>
       client.publish(
-        `${process.env.ADAFRUIT_IO_USERNAME}/feeds/button${message.id}`,
+        `${process.env.ADAFRUIT_IO_USERNAME}/feeds/${message.publish_btn}`,
         message.value.toString(),
         (err) => {
           if (err) {
@@ -39,7 +39,7 @@ exports.adafruit = (socketIo) => {
   });
   client.on("message", async function (topic, message) {
     if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`) {
-      check.HumiThreshold(client, {value: message.toString(), type: "Temperature"}, bt2)
+      check.HumiThreshold(client, {value: message.toString(), type: "Temperature"}, bt2, socketIo)
       let record = new Record({ value: message, type: "Temp", dev_id: 100, createAt: new Date()});
       try {
         await record.save();
@@ -51,7 +51,7 @@ exports.adafruit = (socketIo) => {
         console.log(error);
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`) {
-      check.LightTheshold(client,message.toString(), bt1)
+      check.LightTheshold(client,message.toString(), bt1, socketIo)
       let record = new Record({
         value: message,
         type: "Light",
@@ -69,7 +69,7 @@ exports.adafruit = (socketIo) => {
         console.log(error);
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`) {
-      check.HumiThreshold(client, {value: message.toString(), type: "Humidity"}, bt2)
+      check.HumiThreshold(client, {value: message.toString(), type: "Humidity"}, bt2, socketIo)
       let record = new Record({
         value: message,
         type: "Humi",
@@ -83,7 +83,9 @@ exports.adafruit = (socketIo) => {
         console.log(error)
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`) {
-      socketIo.emit("receiveACk", JSON.parse(message));
+      let ack = message.toString() ;
+      console.log(ack.split(':')) ;
+      socketIo.emit("receiveACk",{publish_btn: ack[0], value: Number(ack[1])});
     }
     else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`) {
       try {
