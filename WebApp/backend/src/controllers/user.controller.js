@@ -1,21 +1,57 @@
 let user = require("../models/user.model").model
+let bcrypt = require('bcrypt')
 
-exports.getUserId = async (req, res, next) => {
+exports.addUser = async (req, res, next) => {
     try {
-        res.send("User id is: " + req.params['id'])
+        data = req.body
+        let userName = data.userName
+        let pwd = data.password
+        let check = await user.find({ userName: userName })
+        if (userName == "" || pwd == "") {
+            res.status(400).send("Please fill out all username and password info")
+        }
+
+        else if (check.length > 0) {
+            res.status(400).send("Username existed")
+        }
+
+        else {
+            let pwdNew = await bcrypt.hash(pwd, 10)
+            let User = new user({ userName: userName, passWord: pwdNew })
+            await User.save()
+            res.send("success")
+        }
+
     }
     catch (err) {
         res.send("Err: " + err)
     }
 }
 
-exports.insertUserId = async (req, res, next) => {
+exports.auth = async (req, res, next) => {
     try {
-        let user1 = new user({ userName: req.params['id'], passWord: "12345" })
-        await user1.save();
-        res.send("Success")
+        data = req.body
+        let userName = data.userName
+        let pwd = data.password
+        let check = await user.find({ userName: userName })
+        if (userName == "" || pwd == "") {
+            res.status(400).send("Please fill out all username and password info")
+        }
+        else if (check.length == 0) {
+            res.status(400).send("Username doesn't exist")
+        }
+        else {
+
+            let checkPwd = await bcrypt.compare(pwd, check[0].passWord)
+            if (checkPwd) {
+                res.send({userID: check[0]._id})
+            }
+            else {
+                res.status(400).send("Incorrect password")
+            }
+        }
     }
     catch (err) {
-        res.send("Err: " + err)
+        ré.send("Err: " + err)
     }
 }
