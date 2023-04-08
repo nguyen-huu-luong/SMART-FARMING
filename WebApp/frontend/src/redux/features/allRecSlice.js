@@ -3,9 +3,9 @@ import * as api from "../api";
 
 export const getAllRecs = createAsyncThunk(
     "/allrecs",
-    async (_, { rejectWithValue }) => {
+    async (page, { rejectWithValue }) => {
       try {
-        const respone = await api.getAllRecords();
+        const respone = await api.getAllRecords(page);
         return respone.data;
       } catch (error) {
         return rejectWithValue(error.respone.data)
@@ -15,7 +15,8 @@ export const getAllRecs = createAsyncThunk(
   const allRecSlice = createSlice({
     name: "allrecords",
     initialState:{
-      datas: [{}],
+      datas: [],
+      totalPages: 0,
       loading: false
     },
     extraReducers:{
@@ -24,7 +25,8 @@ export const getAllRecs = createAsyncThunk(
       },    
       [getAllRecs.fulfilled]: (state, action) => {
         state.loading = false
-        state.datas = action.payload
+        state.datas = action.payload.data
+        state.totalPages = action.payload.totalPages
       },
       [getAllRecs.rejected]: (state, action) => {
         state.loading = false

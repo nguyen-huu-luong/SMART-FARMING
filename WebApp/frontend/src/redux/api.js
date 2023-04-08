@@ -14,7 +14,7 @@ const API = axios.create({baseURL: "http://localhost:3003"})
 
 
 // code to call api
-export const getAllRecords = () => API.get('/allrecs')
+export const getAllRecords = (page) => API.get(`/allrecs/${page}`)
 export const getRecords = () => API.get('/records')
 export const getThreshold =  () => API.get('/threshold')
 export const updateThreshold = (data) => API.put('/threshold', data)
@@ -23,7 +23,7 @@ export const setView = (data) => API.put('/notify/setView', data)
  export const getAllDeviceS = () => API.get('/devices')
 export const getRecordsData = (time)=>API.get(`/records/${time}`)
 export const getAvgValues = () => API.get('records/average')
-export const getUserActivity = () => API.get('/useract')
+export const getUserActivity = (page) => API.get(`/useract/${page}`)
 export const getLight = () => API.get('/getLight')
 export const getWater = () => API.get('/getWater')
 export const setSchedule = (schedule) => API.post('/sendSched', schedule)
