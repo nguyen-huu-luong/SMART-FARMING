@@ -38,9 +38,13 @@ exports.getOne = async (req, res, next) => {
   }
 };
 exports.getAll = async (req, res, next) => {
-  try {
-    let data = await record.find({}).limit(20).sort({ createAt: - 1 });
-    res.send(data);
+  try { 
+    let page = req.params.id;
+    const LIMIT = 6;
+    const startIndex = (Number(page) - 1) * LIMIT;
+    const total = await record.countDocuments({})
+    let records = await record.find({}).limit(LIMIT).sort({createdAt: -1}).skip(startIndex);
+    res.status(200).json({data: records, totalPages: total});
   } catch (err) {
     res.status(500).send(err);
   }

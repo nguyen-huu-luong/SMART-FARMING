@@ -10,7 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import ResponsivePagination from "react-responsive-pagination";
+import Pagination from '@mui/material/Pagination';
 const device = (temp) => {
     switch (temp) {
         case "101":
@@ -37,30 +37,27 @@ const History = () => {
         setStatus(status);
     };
     const time = new Date();
+    //User activity pagination
+    const [userPage, setUserPage] = useState(1)
     const useract = useSelector((state) => state.data.useract)
+    const totalUseract = Number(useSelector((state) => state.data.totalPages))
+    const countUserPage = Math.ceil(totalUseract / 6)
+    const setPageUser = (e, p) => {
+        setUserPage(p);
+    }
+    //Data history pagination
+    const [historyPage, setHistoryPage] = useState(1)
     const dev = useSelector((state) => state.datas.datas)
+    const totalHistory = Number(useSelector((state) => state.datas.totalPages))
+    const countHistoryPage = Math.ceil(totalHistory / 6)
+    const setPage = (e, p) => {
+        setHistoryPage(p);
+    }
     const dispatch = useDispatch()
     useEffect(() => {
-        dispatch(getAllRecs())
-        dispatch(getUserAct())
-    }, [dispatch])
-    const [itemOffset, SetOffset] = useState({ offset: 0, current: 0 })
-    const itemPerPage = 6
-    const endOffset = itemOffset.offset + itemPerPage
-    const devs = dev.slice(itemOffset.offset, endOffset)
-    const countPage = Math.ceil(dev.length / itemPerPage)
-    const handelPagination = (event) => {
-        const newOffset = ((event - 1) * itemPerPage) % dev.length  //event start from 1
-        SetOffset({ offset: newOffset, current: (event) })
-    }
-    const [itemOffset1, SetOffset1] = useState({ offset: 0, current: 0 })
-    const endOffset1 = itemOffset1.offset + itemPerPage
-    const countPage1 = Math.ceil(useract.length / itemPerPage)
-    const useracts = useract.slice(itemOffset1.offset, endOffset1)
-    const handelPagination1 = (event) => {
-        const newOffset = ((event - 1) * itemPerPage) % useract.length  //event start from 1
-        SetOffset1({ offset: newOffset, current: (event) })
-    }
+        dispatch(getAllRecs(historyPage))
+        dispatch(getUserAct(userPage))
+    }, [userPage, historyPage])
     return (
         <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
             <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 justify-content-between align-items-center" id="top-nav">
@@ -99,7 +96,7 @@ const History = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {devs.map((item) => (
+                            {dev.map((item) => (
                                 <TableRow
                                     key={item.name}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -115,14 +112,15 @@ const History = () => {
                 </TableContainer>
                 <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
                     <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
-                        <p style={{ color: "#6C757D" }}>Hiển thị {devs.length} trong tổng {dev.length} dữ liệu</p>
+                        <p style={{ color: "#6C757D" }}>Hiển thị {dev.length} trong tổng {totalHistory} dữ liệu</p>
                     </div>
                     <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
-                        <ResponsivePagination
+                        {/* <ResponsivePagination
                             current={itemOffset.current}
                             total={countPage}
                             onPageChange={handelPagination}
-                        />
+                        /> */}
+                        <Pagination count={countHistoryPage} page={historyPage} onChange={setPage} showFirstButton showLastButton/>
                     </div>
                 </div>
             </div>
@@ -138,7 +136,7 @@ const History = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {useracts.map((item) => (
+                            {useract.map((item) => (
                                 <TableRow
                                     key={item.name}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -153,15 +151,16 @@ const History = () => {
                 </TableContainer>
                 <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
                     <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
-                        <p style={{ color: "#6C757D" }}>Hiển thị {useracts.length} trong tổng {useract.length} dữ liệu</p>
+                        <p style={{ color: "#6C757D" }}>Hiển thị {useract.length} trong tổng {totalUseract} dữ liệu</p>
                     </div>
                     <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
-                        <ResponsivePagination
+                        {/* <ResponsivePagination
                             current={itemOffset1.current}
                             total={countPage1}
                             onPageChange={handelPagination1}
                             maxWidth={5}
-                        />
+                        /> */}
+                        <Pagination count={countUserPage} page={userPage} onChange={setPageUser} showFirstButton showLastButton/>
                     </div>
                 </div>
             </div>
