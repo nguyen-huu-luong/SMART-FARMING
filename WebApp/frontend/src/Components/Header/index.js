@@ -40,7 +40,7 @@ function Header() {
       style={{ height: "var(--header-height)" }}
     >
       <img src={logo} />
-      <ToastContainer />
+      <ToastContainer limit={1} />
       <div className="d-flex align-items-center">
         <Popper
           toggle={
