@@ -7,6 +7,7 @@ let devices = mongoose.Schema({
   type: String,
   nearest_value: Number,
   speed: Number,
+  publish_btn: String,
 });
 
 exports.model = mongoose.model("Devices", devices);

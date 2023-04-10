@@ -6,6 +6,7 @@ let client = mqtt.connect(
   8883
 );
 let Record = require("../../models/records.model").model;
+let Device = require("../../models/devices.model").model
 
 let bt1 = 0
 let bt2 = 0
@@ -84,8 +85,16 @@ exports.adafruit = (socketIo) => {
       }
     } else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`) {
       let ack = message.toString() ;
-      console.log(ack.split(':')) ;
-      socketIo.emit("receiveACk",{publish_btn: ack[0], value: Number(ack[1])});
+      ack = ack.split(':') ;
+      try {
+        let device = await Device.findOne({publish_btn: {$eq: ack[0]}}) ;
+        device.set({status: Number(ack[1])})
+        let result = await device.save()
+        console.log(result)
+        socketIo.emit("receiveACk",{publish_btn: ack[0], value: Number(ack[1])});
+      } catch (error) {
+        socketIo.emit("DatabaseError", {error: error})
+      }
     }
     else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`) {
       try {

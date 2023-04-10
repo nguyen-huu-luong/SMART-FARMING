@@ -57,12 +57,13 @@ const IOSSwitch = styled((props) => (
   },
 }));
 
-export default function CustomizedSwitches({ handleToggle, disabled }) {
+export default function CustomizedSwitches({ handleToggle, disabled, status }) {
   return (
     <FormGroup>
       <FormControlLabel
         disabled={disabled}
-        control={<IOSSwitch sx={{ m: 1 }} defaultChecked={false} />}
+        
+        control={<IOSSwitch sx={{ m: 1 }}  checked={status === 1}/>}
         onChange={(e) => handleToggle(e.target.checked)}
       />
     </FormGroup>

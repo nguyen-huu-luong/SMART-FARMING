@@ -46,9 +46,9 @@ function Sidebar() {
       dispatch(updateHumidity(data));
     });
 
-    socketRef.current.on("receiveACk", (mess) => {
-      console.log(mess)
-    })
+    // socketRef.current.on("receiveACk", (mess) => {
+    //   console.log(mess)
+    // })
 
     // disconnect to socket server
     return () => {

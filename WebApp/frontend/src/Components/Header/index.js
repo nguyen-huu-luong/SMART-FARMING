@@ -1,7 +1,7 @@
 import * as React from "react";
 import logo from "../../Assets/SVG-image/logo.svg";
 import { AiOutlineBell, AiOutlineLogout } from "react-icons/ai";
-import Popper from "../Popper";
+import MyPopper from "../MyPopper";
 import { Fragment } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom"
@@ -42,7 +42,7 @@ function Header() {
       <img src={logo} />
       <ToastContainer limit={1} />
       <div className="d-flex align-items-center">
-        <Popper
+        <MyPopper
           toggle={
             <Fragment>
               <AiOutlineBell size={32} />{" "}
@@ -74,7 +74,7 @@ function Header() {
           }
           </div>
 
-        </Popper>
+        </MyPopper>
         <Tooltip title="Logout" arrow>
           <Link to="/">  <IconButton color="default" className="bg-white text-dark">
             <AiOutlineLogout size={32} />
