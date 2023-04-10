@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Popper from '@mui/material/Popper';
 
-function SimplePopper({children, toggle}) {
+function MyPopper({children, toggle}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleClick = (event) => {
@@ -26,4 +26,4 @@ function SimplePopper({children, toggle}) {
   );
 }
 
-export default SimplePopper
+export default MyPopper

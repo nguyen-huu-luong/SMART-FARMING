@@ -1,5 +1,5 @@
 import moment from "moment";
-import StatusBar from "../Components/StatusBar";
+import StatusBar from "../../Components/StatusBar";
 import { Col, Container, Row } from "react-bootstrap";
 import { AiFillDownCircle, AiFillUpCircle } from "react-icons/ai";
 import React, { useEffect, useState } from "react";
@@ -25,9 +25,9 @@ import {
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 import { useDispatch, useSelector } from "react-redux";
-import { getColor, getUnit } from "../helper/helper";
+import { getColor, getUnit } from "../../helper/helper";
 import { Box, Tabs, Tab } from "@mui/material";
-import { getAverageValues, getRecordsData } from "../redux/features/recordSlice";
+import { getAverageValues, getRecordsData } from "../../redux/features/recordSlice";
 
 ChartJS.register(
   LinearScale,
