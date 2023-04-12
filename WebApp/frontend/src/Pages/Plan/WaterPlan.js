@@ -3,8 +3,11 @@ import moment from "moment/moment";
 import { BsExclamationCircle } from 'react-icons/bs'
 import { useDispatch, useSelector } from "react-redux";
 import { setSched, getWater, deleteSched, modifySched } from "../../redux/features/scheduleSlice";
-import ResponsivePagination from "react-responsive-pagination";
-
+import { Modal, Button, Form } from 'react-bootstrap'
+import { FiEdit } from 'react-icons/fi'
+import { RiDeleteBinFill } from 'react-icons/ri'
+import {MdOutlineDone} from 'react-icons/md'
+import Pagination from '@mui/material/Pagination';
 const WaterPlan = () => {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -13,104 +16,186 @@ const WaterPlan = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
-  let rec = moment(time).format('h:mm A, dddd, MMMM Do YYYY');
-  const [status, setStatus] = useState(2)
-  const radioHandler = (status) => {
-    setStatus(status);
-  };
-  const [ids, setIds] = useState("")
+  const [curr, SetCurr] = useState(true)
+  const [currEdit, SetCurrEdit] = useState(true)
 
+  let rec = moment(time).format('h:mm A, dddd, MMMM Do YYYY')
+  const [ids, setIds] = useState("")
+  const [curData, setCurData] = useState({})
+  //Show modal 
+  const [show, setShow] = useState(false)
+  const handleClose = () => setShow(!show)
+  const handleShow = () => setShow(!show)
+  const [showEdit, setShowEdit] = useState(false)
+  const handleCloseEdit = () => setShowEdit(!showEdit)
+  const handleShowEdit = () => {
+    setShowEdit(!showEdit)
+    if (moment(curData.time).isAfter(moment(time).format("YYYY-MM-DD"))) {
+      SetCurrEdit(false)
+    } else SetCurrEdit(true)
+  }
   //Send data
   const dispatch = useDispatch()
   const handleSubmit = (e) => {
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     e.preventDefault();
-    const data = e.target
+    handleClose()
+    const data = e.currentTarget
     let day = moment(data.date.value).format('YYYY-MM-DD') + ' ' + data.timeF.value
     day = moment(day, 'YYYY-MM-DD HH:mm').format()
     dispatch(setSched({
       time: day,
       weekly: data.weekly.checked,
-      type: "water"
+      type: "water",
+      dev_id: "202",
+      run_time: data.runtime.value
     }))
-    document.getElementById("frm").reset()
+  }
+  // Edit data
+  const handleSubmitEdit = (e) => {
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    e.preventDefault();
+    handleCloseEdit()
+    const data = e.currentTarget
+    console.log(data.runtime.value)
+    let day = moment(data.date.value).format('YYYY-MM-DD') + ' ' + data.timeF.value
+    day = moment(day, 'YYYY-MM-DD HH:mm').format()
+    dispatch(modifySched({
+      id: curData._id,
+      time: day,
+      weekly: data.weekly.checked,
+      run_time: data.runtime.value
+    }))
   }
   // Delete data
   const handleDelete = () => {
-    dispatch(deleteSched({id: ids}))
+    dispatch(deleteSched({ id: ids }))
   }
-  // Weekly
-  const handleChange = (_id, weekly) =>{
-    const rec = !weekly
-    dispatch(modifySched({id: _id, weekly: rec}))
+  // Handle change date:
+  const handle_date = (e) => {
+    if (moment(e.currentTarget.value).isAfter(moment(time).format("YYYY-MM-DD"))) {
+      SetCurr(false)
+    } else SetCurr(true)
   }
-  //Get data
+  const handle_date_edit = (e) => {
+    // console.log(moment(e.currentTarget.value).format("YYYY-MM-DD"), " and ", moment(curData.time).format("YYYY-MM-DD"))
+      if (moment(e.currentTarget.value).isAfter(moment(time).format("YYYY-MM-DD"), 'day')) {
+        SetCurrEdit(false)
+      } else SetCurrEdit(true)
+  }
+  //Get data and pagination
+  const [waterPage, setWaterPage] = useState(1)
   const water = useSelector((state) => state.schedule.water)
-  useEffect(() => {
-    dispatch(getWater())
-  })
-  //Pagination
-  const [itemOffset, SetOffset] = useState({ offset: 0, current: 0 })
-  const itemPerPage = 6
-  const endOffset = itemOffset.offset + itemPerPage
-  const waters = water.slice(itemOffset.offset, endOffset)
-  const countPage = Math.ceil(water.length / itemPerPage)
-  const handelPagination = (event) => {
-    const newOffset = ((event - 1) * itemPerPage) % water.length  //event start from 1
-    SetOffset({ offset: newOffset, current: (event) })
+  const totalWater = Number(useSelector((state) => state.schedule.totalWater))
+  const countWaterPage = Math.ceil(totalWater / 7)
+  const setPages = (e, p) => {
+      setWaterPage(p);
   }
+  useEffect(() => {
+    dispatch(getWater(waterPage))
+  })
   return (
     <>
-      <div className="modal fade" id="addADate" tabIndex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="title">
-                Choose time for watering
-              </h5>
-              <button type="button" className="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      {show && <Modal show={show} onHide={handleClose} backdrop="static" id="add" centered>
+        <Form onSubmit={handleSubmit}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <h4>Choose time for watering</h4>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="form-group">
+              <label htmlFor="date" className="col-form-label">Choose a date</label>
+              <input type="date" className="form-control" min={moment(time).format("YYYY-MM-DD")}
+                defaultValue={moment(time).format("YYYY-MM-DD")} name="date"
+                onChange={handle_date}
+                required />
+              <div className="invalid-feedback">Choose a date</div>
             </div>
-            <form className="needs-validation" id="frm" onSubmit={(e) => { handleSubmit(e) }}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label htmlFor="date" className="col-form-label">Choose a date</label>
-                  <input type="date" className="form-control" min={moment(time).format("YYYY-MM-DD")} defaultValue={moment(time).format("YYYY-MM-DD")} name="date" required />
-                  <div className="invalid-feedback">Choose a date</div>
-                </div>
-                <div className="form-group form-check-inline">
-                  <label htmlFor="weekly" className="form-check-label">Weekly</label>
-                  <input className="form-check-input form-control" type="checkbox" name="weekly" id="weekly" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="timeF" className="col-form-label">Choose time</label>
-                  <input type="time" min={moment(time).format("HH:mm")} defaultValue={moment(time).format("HH:mm")} className="form-control" id="timeF" required />
-                  <div className="invalid-feedback">Choose time</div>
-                </div>
-
-                <div className="modal-footer d-flex justify-content-around">
-                  <button type="button" className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                    style={{ backgroundColor: "grey", borderColor: "grey", width: "120px" }}>Hủy</button>
-                  <button type="submit" className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    style={{ width: "120px" }}>Hoàn thành</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+            <div className="form-group">
+              <label htmlFor="weekly" className="form-check-label">Weekly</label>
+              <input className="form-check-input form-control" type="checkbox" name="weekly" id="weekly" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="timeF" className="col-form-label">Choose time</label>
+              <input type="time" min={curr ? moment(time).add(1, 'minutes').format("HH:mm") : "00:00"} defaultValue={moment(time).format("HH:mm")} className="form-control" id="timeF" required />
+              <div className="invalid-feedback">Choose time</div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="runtime" className="form-label">Device run time &#40;s&#41;:</label>
+              <input className="form-control" min={10} defaultValue={10} type="number" name="runtime" id="runtime" required />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" className="border font-weight-normal px-5" onClick={handleClose}>
+              Huỷ
+            </Button>
+            <Button variant="primary" type="submit">
+              Hoàn thành
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>}
+      {showEdit && <Modal show={showEdit} onHide={handleCloseEdit} backdrop="static" id="edit" centered>
+        <Form onSubmit={handleSubmitEdit}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <h4>Edit watering schedule</h4>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="form-group">
+              <label htmlFor="date" className="col-form-label">Choose a date</label>
+              <input type="date" className="form-control" min={moment(time).format("YYYY-MM-DD")}
+                onChange={handle_date_edit}
+                defaultValue={moment(curData.time).format("YYYY-MM-DD")} name="date"
+                required />
+              <div className="invalid-feedback">Choose a date</div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="weekly" className="form-check-label">Weekly</label>
+              <input className="form-check-input form-control" type="checkbox" name="weekly" id="weekly" defaultChecked={curData.weekly} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="timeF" className="col-form-label">Choose time</label>
+              <input type="time" min={currEdit ? moment(time).add(1, 'minutes').format("HH:mm") : "00:00"} defaultValue={moment(curData.time).format("HH:mm")} className="form-control" id="timeF" required />
+              <div className="invalid-feedback">Choose time</div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="runtime" className="form-label">Device run time &#40;s&#41;:</label>
+              <input className="form-control" min={10} defaultValue={curData.run_time} type="number" name="runtime" id="runtime" required />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" className="border font-weight-normal px-5" onClick={handleCloseEdit}>
+              Huỷ
+            </Button>
+            <Button variant="primary" type="submit">
+              Hoàn thành
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>}
       <div className="modal fade" id="deleteDate" tabIndex="-1" role="dialog" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="modal-content" style={{ width: "400px", height: "350px" }}>
             <div className="modal-body d-flex flex-column justify-content-around align-items-center font-weight-bold">
-              <div className="noti">Delete date from list</div>
+              <h2>Delete date from list</h2>
               <BsExclamationCircle style={{ width: "100px", height: "100px", color: "red" }} />
               <div className="rework">You can not undo this action</div>
             </div>
             <div className="modal-footer d-flex justify-content-around">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" style={{ backgroundColor: "grey", borderColor: "grey", width: "100px" }}>Hủy</button>
-              <button type="button" className="btn btn-primary" data-bs-dismiss="modal"  style={{ backgroundColor: "red", borderColor: "red", width: "100px" }}
-              onClick={() => {handleDelete()}}
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" style={{ backgroundColor: "red", borderColor: "red", width: "100px" }}
+                onClick={() => { handleDelete() }}
               >Xóa</button>
             </div>
           </div>
@@ -125,51 +210,37 @@ const WaterPlan = () => {
             {rec}
           </h6>
         </div>
-        <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 justify-content-between align-items-center" id="pick">
-          <div className="col-5 form-check d-flex justify-content-end gap-2">
-            <input className="form-check-input" type="radio" name="choose" id="def" defaultChecked={status === 1} onClick={(e) => radioHandler(1)} />
-            <label className="form-check-label" htmlFor="def">
-              Daily watering
-            </label>
-          </div>
-          <div className="col-2 m-0" style={{ display: status === 1 ? 'block' : 'none' }}>
-            <div className="form-outline m-0 p-0" id="time">
-              <input type="time" className="form-control" id="form1" />
-            </div>
-          </div>
-          <div className="col-5 form-check d-flex justify-content-start gap-2">
-            <input className="form-check-input" type="radio" name="choose" id="cus" defaultChecked={status === 2} onClick={(e) => radioHandler(2)} />
-            <label className="form-check-label" htmlFor="cus">
-              Custom water schedule
-            </label>
-          </div>
-        </div>
-        <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 h-100 justify-content-between align-items-center" id="tool"
-          style={{ display: status === 2 ? 'block' : 'none' }}>
+        <div className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 h-100 justify-content-between align-items-center" id="tool">
           <table className="table table-hover">
             <thead>
               <tr className="align-middle">
                 <th scope="col" className="text-start">Schedule</th>
                 <th scope="col" className="text-center">Weekly</th>
-                <th scope="col" className="text-end"><button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                  data-bs-target="#addADate">Add a date</button>
+                <th scope="col" className="text-center">Device run time &#40;s&#41;</th>
+                <th scope="col" className="text-end">
+                  <Button variant="primary" onClick={() => { handleShow() }}>
+                    Add a date
+                  </Button>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {waters.map((current) => (
-                <tr key={current._id} className="align-middle">
+              {water.map((current) => (
+                <tr key={current._id} className="align-middle" disabled>
                   <td> {moment(current.time).format('h:mm A, dddd, MMMM Do YYYY')} </td>
                   <td className="text-center">
-                    <input className="form-check-input" type="checkbox" 
-                    name="weekly" id={current._id} defaultChecked={current.weekly}
-                    onChange={() => handleChange(current._id, current.weekly)}/>
+                    {current.weekly && <MdOutlineDone/>}
                   </td>
-                  <td className="text-end"><button type="button" className="btn btn-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteDate"
-                    onClick={() => {setIds(current._id)}}
-                    >Delete</button>
+                  <td className="text-center"> {current.run_time} </td>
+                  <td className="text-end d-flex gap-2 flex-row-reverse">
+                    <button type="button" className="btn btn-danger ml-2"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteDate"
+                      onClick={() => { setIds(current._id) }}
+                    ><RiDeleteBinFill /></button>
+                    <Button variant="success" onClick={() => { setCurData(current); handleShowEdit() }}>
+                      <FiEdit />
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -178,14 +249,15 @@ const WaterPlan = () => {
           </table>
           <div className="row d-flex flex-sm-row flex-column w-100 justify-content-between align-items-center mt-2  gap-1">
             <div className="col d-flex flex-row w-100 justify-content-md-start justify-content-center align-items-center" id="bottom-left">
-              <p style={{ color: "#6C757D" }}>Hiển thị {waters.length} trong tổng {water.length} dữ liệu</p>
+              <p style={{ color: "#6C757D" }}>Hiển thị {water.length} trong tổng {totalWater} dữ liệu</p>
             </div>
             <div className="col d-flex flex-row w-100 justify-content-md-end justify-content-center align-items-center" id="bottom-right">
-              <ResponsivePagination
+              {/* <ResponsivePagination
                 current={itemOffset.current}
                 total={countPage}
                 onPageChange={handelPagination}
-              />
+              /> */}
+              <Pagination count={countWaterPage} page={waterPage} onChange={setPages} showFirstButton showLastButton/>
             </div>
           </div>
         </div>

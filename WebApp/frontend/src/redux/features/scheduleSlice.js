@@ -4,20 +4,20 @@ import * as api from "../api";
 // Async actions
 export const getLight = createAsyncThunk(
     "/getLight",
-    async (_, { rejectWithValue }) => {
+    async (page, { rejectWithValue }) => {
         try {
-            const respone = await api.getLight();
+            const respone = await api.getLight(page);
             return respone.data;
-        } catch (error) {
+        } catch (error) { 
             return rejectWithValue(error.respone.data);
         }
     }
 );
 export const getWater = createAsyncThunk(
     "/getWater",
-    async (_, { rejectWithValue }) => {
+    async (page, { rejectWithValue }) => {
         try {
-            const respone = await api.getWater();
+            const respone = await api.getWater(page);
             return respone.data;
         } catch (error) {
             return rejectWithValue(error.respone.data);
@@ -57,6 +57,8 @@ export const thresholdSlice = createSlice({
     initialState: {
         light: [],
         water: [],
+        totalLight: 0,
+        totalWater: 0,
         error: "",
         loading: false,
     },
@@ -66,7 +68,8 @@ export const thresholdSlice = createSlice({
         },
         [getLight.fulfilled]: (state, action) => {
             state.loading = false;
-            state.light = action.payload;
+            state.light = action.payload.data;
+            state.totalLight = action.payload.totalPages
         },
         [getLight.rejected]: (state, action) => {
             state.loading = false;
@@ -77,7 +80,8 @@ export const thresholdSlice = createSlice({
         },
         [getWater.fulfilled]: (state, action) => {
             state.loading = false;
-            state.water = action.payload;
+            state.water = action.payload.data;
+            state.totalWater = action.payload.totalPages;
         },
         [getWater.rejected]: (state, action) => {
             state.loading = false;

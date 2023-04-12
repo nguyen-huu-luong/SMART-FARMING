@@ -4,7 +4,9 @@ let schedules = mongoose.Schema(
     {
     time: Date,
     weekly: Boolean,
-    type: String
+    type: String,
+    dev_id: String,
+    run_time: Number,
     },
     { timestamps: true }
 );

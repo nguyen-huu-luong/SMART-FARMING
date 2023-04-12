@@ -3,8 +3,12 @@ let userAct = require("../models/userAct.model").model
 let moment = require('moment')
 exports.getLight = async (req, res, next) => {
     try {
-        const light = await schedule.find({type: "light"}).sort({createdAt: -1});
-        res.send(light);    
+        let page = req.params.id;
+        const LIMIT = 7;
+        const startIndex = (Number(page) - 1) * LIMIT;
+        const total = await schedule.countDocuments({type: "light"})
+        const light = await schedule.find({type: "light"}).limit(LIMIT).sort({createdAt: -1}).skip(startIndex);
+        res.status(200).json({data: light, totalPages: total});
     }
     catch (err) {
         res.send("Err: " + err)
@@ -13,8 +17,12 @@ exports.getLight = async (req, res, next) => {
 
 exports.getWater = async (req, res, next) => {
     try {
-        const water = await schedule.find({type: "water"}).sort({createdAt: -1});
-        res.send(water);    
+        let page = req.params.id;
+        const LIMIT = 7;
+        const startIndex = (Number(page) - 1) * LIMIT;
+        const total = await schedule.countDocuments({type: "water"})
+        const water = await schedule.find({type: "water"}).limit(LIMIT).sort({createdAt: -1}).skip(startIndex);
+        res.status(200).json({data: water, totalPages: total});
     }
     catch (err) {
         res.send("Err: " + err)
@@ -24,7 +32,7 @@ exports.getWater = async (req, res, next) => {
 exports.sendSchedule = async (req, res, next) => {
     try {
         let schedule1 = new schedule({ time: req.body['time'], weekly: req.body['weekly'],
-                        type: req.body['type']})
+                        type: req.body['type'], run_time: req.body['run_time'], dev_id: req.body['dev_id']})
         let userAct1 = new userAct({action: "Set schedule for " + req.body['type'] + " at " + moment(req.body['time']).format('h:mm A, dddd, MMMM Do YYYY'), actor: "User"})
         await schedule1.save();
         await userAct1.save();
@@ -38,7 +46,7 @@ exports.sendSchedule = async (req, res, next) => {
 
 exports.modifySchedule = async (req, res, next) => {
     try {
-        await schedule.findByIdAndUpdate(req.body['id'], {weekly: req.body['weekly']})
+        await schedule.findByIdAndUpdate(req.body['id'], {weekly: req.body['weekly'], run_time: req.body['run_time'], time: req.body['time']})
         res.send("Success")
     }
     catch (err) {
