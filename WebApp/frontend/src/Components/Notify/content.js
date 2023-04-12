@@ -37,14 +37,14 @@ const Content = ({item}) => {
            <p>Threshold time: {formatedDate}</p>
            <p>Current value of light: {item.current1}</p>
            <p>Light status: {item.buttonStatus}</p>
-           <p>Action advice: {item.content}</p>
+           <p>Action: {item.content}</p>
           </> 
           :    <>
           <p>Threshold time: {formatedDate}</p>
           <p>Current value of Humidity: {item.current1}</p>
            <p>Current value of Temperature: {item.current2}</p>
            <p>Pump status: {item.buttonStatus}</p>
-           <p>Action advice: {item.content}</p>
+           <p>Action: {item.content}</p>
           </> 
           }
           </Modal.Body>
