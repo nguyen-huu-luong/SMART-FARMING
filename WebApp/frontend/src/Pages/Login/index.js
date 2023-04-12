@@ -18,6 +18,7 @@ const Login = () => {
         // navigate('/dashboard')
     }
     if (userID != "") {
+        sessionStorage.setItem('user', userID) 
         navigate('/dashboard')
     }
 
