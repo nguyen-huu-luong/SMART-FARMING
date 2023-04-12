@@ -19,32 +19,32 @@ exports.scheduleService = async (clientIO) => {
       await scheduleModel.findByIdAndRemove({ _id: schedule[0]['id'] })
       if (schedule[0]['type'] === "light") temp = "button1";
       let userAct1 = new userAct({
-        action: "Auto turn on the " + `${(temp === 1) ? "light bulb" : "water pump"}` +
+        action: "Auto turn on the " + `${(temp === "button1") ? "light bulb" : "water pump"}` +
           " at " + moment(schedule[0]['time']).format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
       })
       clientIO.emit("toggleButton", { publish_btn: temp, value: 1 });
       await userAct1.save();
-      sleep(10000).then(() => {
+      sleep(schedule[0]["run_time"]*1000).then(() => {
         let userAct2 = new userAct({
           action: "Auto turn off the " + `${(temp === 1) ? "light bulb" : "water pump"}` +
-            " at " + moment(schedule[0]['time']).add(5, "minutes").format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
+            " at " + moment(schedule[0]['time']).add(schedule[0]["run_time"], "seconds").format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
         })
         userAct2.save();
         clientIO.emit("toggleButton", { publish_btn: temp, value: 0 });
       });
     } else {
       await scheduleModel.findByIdAndUpdate(schedule[0]['id'], { time: moment(schedule[0]['time']).add(1, "week").toISOString() })
-      if (schedule[0]['type'] === "light") temp = 1;
+      if (schedule[0]['type'] === "light") temp = "button1";
       let userAct1 = new userAct({
-        action: "Auto turn on the " + `${(temp === 1) ? "light bulb" : "water pump"}` +
+        action: "Auto turn on the " + `${(temp === "button1") ? "light bulb" : "water pump"}` +
           " at " + moment(schedule[0]['time']).format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
       })
       clientIO.emit("toggleButton", { publish_btn: temp, value: 1 });
       await userAct1.save();
-      sleep(10000).then(() => {
+      sleep(schedule[0]["run_time"]*1000).then(() => {
         let userAct2 = new userAct({
           action: "Auto turn off the " + `${(temp === 1) ? "light bulb" : "water pump"}` +
-            " at " + moment(schedule[0]['time']).add(5, "minutes").format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
+            " at " + moment(schedule[0]['time']).add(schedule[0]["run_time"], "seconds").format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
         })
         userAct2.save();
         clientIO.emit("toggleButton", { publish_btn: temp, value: 0 });
