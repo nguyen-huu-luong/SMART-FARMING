@@ -55,7 +55,7 @@ function Devices() {
             error: "No response from the server, please try again",
           });
         }
-      }, 5000);
+      }, 10000);
     }
 
     return () => clearTimeout(timerId);
@@ -253,7 +253,7 @@ function Devices() {
                         </>
                       ) : (
                         <>
-                          <p>Not scheduled</p>
+                          <p className = "my-0">Not scheduled</p>
                           <Link to="/waterplan" className="btn text-success">
                             <b>Change</b>
                           </Link>

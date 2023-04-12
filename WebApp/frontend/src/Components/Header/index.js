@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getNotify, decrement, setCheck } from "../../redux/features/notifySlice";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
 
  
 const host = "http://localhost:3003"
@@ -19,6 +20,7 @@ const host = "http://localhost:3003"
 function Header() {
   const socketRef = useRef();
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   useEffect(() => {
     socketRef.current = socketIOClient.connect(host)
     dispatch(getNotify(0)) 
@@ -33,6 +35,15 @@ function Header() {
   const data = dataAll.data
   let numNotify = dataAll.countAfter
 
+  //navigate('/')
+  const handelLogout = () => {
+    sessionStorage.clear()
+    navigate('/')
+  }
+
+  if(!sessionStorage.getItem('user')) {
+    navigate('/404')
+  } 
   
   return (
     <div
@@ -76,9 +87,9 @@ function Header() {
 
         </MyPopper>
         <Tooltip title="Logout" arrow>
-          <Link to="/">  <IconButton color="default" className="bg-white text-dark">
+          <button onClick={handelLogout} className="bg-white"> <IconButton color="default" className="bg-white text-dark">
             <AiOutlineLogout size={32} />
-          </IconButton> </Link>
+          </IconButton> </button> 
         </Tooltip>
       </div>
     </div>

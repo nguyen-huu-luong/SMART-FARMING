@@ -308,9 +308,9 @@ exports.getHumi = async () => {
 exports.createRandomData = async (req, res, next) => {
   let data = [];
   const DAY = 86400000
-  const TIME_SLOT =  30000 // cứ 30 giây thêm 1 records, 1 ngày = 2880, 1 tháng = 30 ngày 86400 records
+  const TIME_SLOT =  300000 // cứ 30 giây thêm 1 records, 1 ngày = 2880, 1 tháng = 30 ngày 86400 records
   // Số lượng records lớn có thể gây đứng máy :v 
-  const NUM_DAYS = 5 // Số ngày cần tạo dữ liệu
+  const NUM_DAYS = 60 // Số ngày cần tạo dữ liệu
   let date1 = new Date(new Date().getTime() - NUM_DAYS*DAY);
   date1.setHours(0, 0, 12, 0);
   let date2 = new Date(new Date().getTime() - NUM_DAYS*DAY);
