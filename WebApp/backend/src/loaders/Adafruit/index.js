@@ -24,6 +24,7 @@ exports.adafruit = (socketIo) => {
             return;
           }
           console.log(`Message published to feed`);
+          socketIo.emit("waitingAck", message)
         }
       )
     );
