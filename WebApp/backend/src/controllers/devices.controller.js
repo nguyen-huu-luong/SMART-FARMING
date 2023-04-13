@@ -10,6 +10,13 @@ exports.getAll = async (req, res) => {
           localField: "dev_id",
           foreignField: "dev_id",
           as: "schedules",
+          pipeline: [
+            {
+              $sort: {"time": 1}
+            }, {
+              $limit: 1
+            }
+          ]
         },
       },
       {
@@ -26,7 +33,7 @@ exports.getAll = async (req, res) => {
       {
         $project: {
           time: {
-            $ifNull: ["$time", null]
+            $ifNull: ["$time", null],
           },
           _id: 1,
           dev_id: 1,

@@ -51,7 +51,7 @@ const WaterPlan = () => {
       time: day,
       weekly: data.weekly.checked,
       type: "water",
-      dev_id: "202",
+      dev_id: "200",
       run_time: data.runtime.value
     }))
   }

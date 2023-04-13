@@ -1,6 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
-import moment from "moment";
 import { Link } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +16,7 @@ import { getUnit } from "../../helper/helper";
 import lighton from "../../Assets/Image/pic_bulbon.gif";
 import lightoff from "../../Assets/Image/pic_bulboff.gif";
 import MyModal from "../../Components/MyModal";
+import CountDown from "../../Components/CountDown";
 
 const host = "http://localhost:3003";
 
@@ -26,8 +26,6 @@ function Devices() {
     isWaiting: false,
     error: "",
   });
-  const [time, setTime] = useState(100);
-  const [showModal, setShowModal] = useState(false);
   const socketRef = useRef();
   const dispatch = useDispatch();
   const devices = useSelector((state) => state.devices);
@@ -67,6 +65,11 @@ function Devices() {
   useEffect(() => {
     // connect to host
     socketRef.current = socketIOClient.connect(host);
+    socketRef.current.on("waitingAck", (message) => {
+      setWaiting((state) => {
+        return { ...state, btn: message.publish_btn, isWaiting: true };
+      });
+    });
     socketRef.current.on("receiveACk", (message) => {
       if (waiting.isWaiting) {
         setWaiting((state) => ({ ...state, btn: "", isWaiting: false }));
@@ -88,7 +91,7 @@ function Devices() {
     <>
       <Container className="p-4 d-flex flex-column w-100 h-100 align-items-center">
         <StatusBar title="IoT dashboard" />
-        <Row className="g-0 w-100 mt-3 mb-2">
+        <Row className="g-0 w-100 mt-3 mb-1">
           {data
             .filter((item) => item.type === "input")
             .map(
@@ -135,135 +138,83 @@ function Devices() {
             )}
         </Row>
 
-        <Row className="g-0 w-100">
+        <Row className="g-0 w-100 align-items-start">
           {data
             .filter((item) => item.type === "output")
-            .map((item, index) =>
-              item.name === "Light" ? (
-                <Col
-                  md={4}
-                  key={index}
-                  className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
-                >
-                  <div className="p-3 bg-white shadow rounded">
-                    <div className="d-flex">
+            .map((item, index) => (
+              <Col
+                md={4}
+                key={index}
+                className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
+              >
+                <div className="p-3 bg-white shadow rounded">
+                  <div className="d-flex">
+                    {item.name == "Light" ? (
                       <img
                         src={item.status === 1 ? lighton : lightoff}
                         alt="light"
+                        style={{ height: 120 }}
                       />
-                      <div className="ps-4">
-                        <b>Light 1</b>
-                        <p className="my-2">
-                          Status:{" "}
-                          <b className="color-primary">
-                            {item.status === 1 ? "ON" : "OFF"}
-                          </b>
-                        </p>
-                        <CustomizedSwitches
-                          disabled={waiting.isWaiting}
-                          status={item.status}
-                          handleToggle={(isCheck) =>
-                            handleToggle(item.publish_btn, isCheck)
-                          }
-                        />
-                        {waiting.isWaiting &&
-                          waiting.btn === item.publish_btn && (
-                            <div className="d-flex align-items-center">
-                              <p className="color-primary my-0 me-2">
-                                {item.status === 0
-                                  ? "Turning on"
-                                  : "Turning off"}
-                              </p>
-                              <Spin />
-                            </div>
-                          )}
-                      </div>
-                    </div>
-
-                    <div className="d-flex align-items-center justify-content-between">
-                      {item.time ? (
-                        <>
-                          <p className="my-2">Remainding time: </p>
-                          <span>{(new Date(item.time.getTime() - new Date()))}</span>
-                          <Link to="/lightplan" className="btn text-success">
-                            <b>Change</b>
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          <p className="my-0">Not scheduled</p>
-                          <Link to="/lightplan" className="btn text-success">
-                            <b>+ New</b>
-                          </Link>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Col>
-              ) : (
-                <Col
-                  md={4}
-                  key={index}
-                  className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
-                >
-                  <div className="p-3 bg-white shadow rounded">
-                    <div className="d-flex">
+                    ) : (
                       <img
-                        width={"50%"}
                         src={require("../../Assets/Image/pump.jpg")}
                         alt="pump"
+                        style={{ height: 120 }}
                       />
-                      <div className="ps-4">
-                        <b>Pump</b>
-                        <p className="my-2">
-                          Status:{" "}
-                          <b className="color-primary">
-                            {item.status === 1 ? "ON" : "OFF"}
-                          </b>
-                        </p>
-                        <CustomizedSwitches
-                          status={item.status}
-                          disabled={waiting.isWaiting}
-                          handleToggle={(isCheck) =>
-                            handleToggle(item.publish_btn, isCheck)
-                          }
-                        />
-                        {waiting.isWaiting &&
-                          waiting.btn === item.publish_btn && (
-                            <div className="d-flex align-items-center">
-                              <p className="color-primary my-0 me-2">
-                                {item.status === 0
-                                  ? "Turning on"
-                                  : "Turning off"}
-                              </p>
-                              <Spin />
-                            </div>
-                          )}
-                      </div>
-                    </div>
-
-                    <div className="d-flex align-items-center justify-content-between">
-                      {item.time ? (
-                        <>
-                          <p className="my-2">Remainding time: </p>
-                          <span>{moment(new Date(item.time).getTime() - new Date().getTime()).format("hh:mm:ss")}</span>
-                          <Link to="/waterplan" className="btn text-success">
-                            <b>Change</b>
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          <p className = "my-0">Not scheduled</p>
-                          <Link to="/waterplan" className="btn text-success">
-                            <b>Change</b>
-                          </Link>
-                        </>
-                      )}
+                    )}
+                    <div className="ps-4">
+                      <b>{item.name}</b>
+                      <p className="my-2">
+                        Status:{" "}
+                        <b className="color-primary">
+                          {item.status === 1 ? "ON" : "OFF"}
+                        </b>
+                      </p>
+                      <CustomizedSwitches
+                        disabled={waiting.isWaiting}
+                        status={item.status}
+                        handleToggle={(isCheck) =>
+                          handleToggle(item.publish_btn, isCheck)
+                        }
+                      />
+                      {waiting.isWaiting &&
+                        waiting.btn === item.publish_btn && (
+                          <div className="d-flex align-items-center">
+                            <p className="color-primary my-0 me-2">
+                              {item.status === 0 ? "Turning on" : "Turning off"}
+                            </p>
+                            <Spin />
+                          </div>
+                        )}
                     </div>
                   </div>
-                </Col>
-              )
-            )}
+
+                  <div className="d-flex align-items-center justify-content-between">
+                    {item.time ? (
+                      <>
+                        <p className="my-2">Remainding time: </p>
+                        <CountDown
+                          targetDate={new Date(item.time)}
+                          handleTimeOut={() => {
+                            dispatch(getAllDevices());
+                          }}
+                        />
+                        <Link to={item.name === "Light" ? "/lightplan" : "/waterplan"} className="btn text-success">
+                          <b>Change</b>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <p className="my-0">Not scheduled</p>
+                        <Link to={item.name === "Light" ? "/lightplan" : "/waterplan"} className="btn text-success">
+                          <b>+ New</b>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            ))}
         </Row>
       </Container>
 
