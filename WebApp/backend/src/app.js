@@ -32,11 +32,11 @@ const startServer = async () => {
 
     app.use(
       cors({
-        origin: ["http://localhost:3000"],
+        origin: "*",
         credentials: true,
       })
     );
-    const clientIO = client.connect("http://localhost:3003")
+    const clientIO = client.connect(process.env.HOST || "http://localhost:3003")
     // Schedule service
     setInterval(() => service(clientIO), 1000);
     route(app);

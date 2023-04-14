@@ -1,0 +1,36 @@
+.floating-sidebar {
+    position: fixed;
+    z-index: 1000;
+    background-color: #fff;
+    left: 0;
+    top: var(--header-height);
+    bottom: 0;    
+}
+.close-sidebar {
+    position: absolute;
+    right: 16px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    .close-icon {
+        display: none;
+    }
+    &:hover .close-icon {
+        display: block;
+        cursor: pointer;
+    }
+}
+
+
+
+@keyframes SidebarFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%);
+    } to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
