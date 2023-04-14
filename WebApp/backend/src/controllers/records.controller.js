@@ -318,7 +318,7 @@ exports.createRandomData = async (req, res, next) => {
   let date3 = new Date(new Date().getTime() - NUM_DAYS*DAY);
   date3.setHours(0, 0, 14, 0); 
 
-  for (let i = 0; i < NUM_DAYS*DAY + 86400000; i += TIME_SLOT) {
+  for (let i = 0; i < NUM_DAYS*DAY; i += TIME_SLOT) {
     data.push({
       value: 20 + (Math.random() > 0.5 ? Number((Math.random() * 20).toFixed(1)) : Math.floor(Math.random()*20)),
       createAt: new Date(date1.getTime() + i),

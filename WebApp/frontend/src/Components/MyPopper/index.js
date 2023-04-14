@@ -17,8 +17,8 @@ function MyPopper({children, toggle}) {
       <button aria-describedby={id} type="button" className='bg-white position-relative' onClick={handleClick}>
         {toggle}
       </button>
-      <Popper id={id} open={open} anchorEl={anchorEl}>
-        <Box sx={{ bgcolor: 'background.paper' }} className="px-3 shadow">
+      <Popper id={id} open={open} anchorEl={anchorEl} className='z-2'>
+        <Box sx={{ bgcolor: 'background.paper' }} className="px-3 shadow z-2">
           {children}
         </Box>
       </Popper>

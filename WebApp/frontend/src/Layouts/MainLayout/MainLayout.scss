@@ -1,8 +1,15 @@
 .body-wrapper {
     margin-top: var(--header-height);
     height: calc(100% - var(--header-height));
+    position: relative;
 }
 
 .content {
     margin-left: var(--sidebar-width);
 }
+
+.floating-sidebar + .content {
+    margin-left: 0;
+}
+
+

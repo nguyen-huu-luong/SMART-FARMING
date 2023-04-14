@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import { useState, useRef, useEffect } from "react"
 import { useDispatch, useSelector, } from "react-redux"
 import { getThreshold, updateThreshold } from "../../redux/features/thresholdSlice"
+import { useViewport } from "../../hooks"
 
 const Threshold = () => {
     const [show, setShow] = useState(false);
@@ -43,11 +44,11 @@ const Threshold = () => {
     };
 
     return (
-        <div className="container p-4 w-100" style={{ minHeight: "90vh" }}>
+        <div className="py-2 px-0 p-md-4 container w-100 " style={{ minHeight: "90vh", maxWidth: "100%" }}>
             <StatusBar title="Set threshold" />
-            <div className="container p-3 py-5 my-2 mx-2 w-100 bg-white border rounded">
+            <div className="p-3 py-5 my-2 mx-2 w-100 bg-white border rounded w-100">
                 <form className="container" onSubmit={handleShow} >
-                    <div className="container d-flex justify-content-around" >
+                    <div className="row d-flex justify-content-around" >
                         <ThresItem name="Humidity" image={Humidity} color="#1793ED" minValue={{ min: 0, value: dataValue.thresValue[0].min }} maxValue={{ max: 1, value: dataValue.thresValue[0].max }} refer={value} />
                         <ThresItem name="Temperature" image={Temp} color="#FE2F2F" minValue={{ min: 2, value: dataValue.thresValue[1].min }} maxValue={{ max: 3, value: dataValue.thresValue[1].max }} refer={value} />
                         <ThresItem name="Light" image={Light} color="#D65C28" minValue={{ min: 4, value: dataValue.thresValue[2].min }} maxValue={{ max: 5, value: dataValue.thresValue[2].max }} refer={value} />

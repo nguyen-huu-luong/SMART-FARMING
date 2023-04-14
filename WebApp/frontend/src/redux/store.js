@@ -20,3 +20,5 @@ export default configureStore({
         user: userSlice
     },
 })
+
+export const host = process.env.REACT_APP_BASE_URL || "http://localhost:3003"
