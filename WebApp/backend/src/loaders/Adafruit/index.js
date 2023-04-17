@@ -1,10 +1,7 @@
 let check = require('../../services/checkThreshold')
 const mqtt = require("mqtt");
 require("dotenv").config();
-let client = mqtt.connect(
-  `mqtt://${process.env.ADAFRUIT_IO_USERNAME}:${process.env.ADAFRUIT_IO_KEY}@io.adafruit.com`,
-  8883
-);
+
 let Record = require("../../models/records.model").model;
 let Device = require("../../models/devices.model").model
 
@@ -13,6 +10,10 @@ let bt2 = 0
 let checker = { emitCheck: false, mess: "" }
 
 exports.adafruit = (socketIo) => {
+  let client = mqtt.connect(
+    `mqtt://${process.env.ADAFRUIT_IO_USERNAME}:${process.env.ADAFRUIT_IO_KEY}@io.adafruit.com`,
+    8883
+  );
   socketIo.on("connection", (socket) => {
     socket.on("toggleButton", (message) =>
       client.publish(
@@ -33,8 +34,6 @@ exports.adafruit = (socketIo) => {
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`); // temp
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien2`); // light
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien3`); // humi
-    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`); // humi
-    client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`); // temp
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`); // light
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`); // pump
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/ack`);
