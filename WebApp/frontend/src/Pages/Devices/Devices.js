@@ -17,8 +17,8 @@ import lighton from "../../Assets/Image/pic_bulbon.gif";
 import lightoff from "../../Assets/Image/pic_bulboff.gif";
 import MyModal from "../../Components/MyModal";
 import CountDown from "../../Components/CountDown";
-
-const host = "http://localhost:3003";
+import { useViewport } from "../../hooks";
+import { host } from "../../redux/store";
 
 function Devices() {
   const [waiting, setWaiting] = useState({
@@ -28,6 +28,7 @@ function Devices() {
   });
   const socketRef = useRef();
   const dispatch = useDispatch();
+  const viewport = useViewport();
   const devices = useSelector((state) => state.devices);
   const data = devices.devices;
   console.log("re-render", waiting);
@@ -89,7 +90,10 @@ function Devices() {
   }, [waiting, dispatch]);
   return (
     <>
-      <Container className="p-4 d-flex flex-column w-100 h-100 align-items-center">
+      <Container
+        className="py-2 px-0 p-md-4 d-flex flex-column w-100 gap-2 h-100"
+        style={{ maxWidth: "100%" }}
+      >
         <StatusBar title="IoT dashboard" />
         <Row className="g-0 w-100 mt-3 mb-1">
           {data
@@ -99,11 +103,17 @@ function Devices() {
                 item.type === "input" && (
                   <Col
                     md={4}
+                    sm={12}
+                    xs={12}
                     key={index}
-                    className={index % 3 === 1 ? "px-3 py-2" : "py-2"}
+                    className={
+                      viewport.width >= 768 && index % 3 === 1
+                        ? "px-3 py-2"
+                        : "py-2"
+                    }
                   >
                     <div
-                      className="bg-white shadow d-flex align-items-center rounded"
+                      className="px-2 bg-white shadow d-flex align-items-center rounded"
                       style={{
                         borderBottom: `3px solid ${getColor(item.type)}`,
                         borderRadius: 8,
@@ -145,7 +155,10 @@ function Devices() {
               <Col
                 md={4}
                 key={index}
-                className={(index % 3 === 1 ? "px-3" : "") + " py-2"}
+                className={
+                  (viewport.width >= 768 && index % 3 === 1 ? "px-3" : "") +
+                  " py-2"
+                }
               >
                 <div className="p-3 bg-white shadow rounded">
                   <div className="d-flex">
@@ -192,21 +205,39 @@ function Devices() {
                   <div className="d-flex align-items-center justify-content-between">
                     {item.time ? (
                       <>
-                        <p className="my-2">Remainding time: </p>
-                        <CountDown
-                          targetDate={new Date(item.time)}
-                          handleTimeOut={() => {
-                            dispatch(getAllDevices());
-                          }}
-                        />
-                        <Link to={item.name === "Light" ? "/lightplan" : "/waterplan"} className="btn text-success">
+                        <div
+                          className={`${
+                            viewport.width <= 572
+                              ? "flex-column"
+                              : "align-items-cente"
+                          } d-flex my-2`}
+                        >
+                          <p className="my-0 me-2">Remainding time: </p>
+                          <CountDown
+                            targetDate={new Date(item.time)}
+                            handleTimeOut={() => {
+                              dispatch(getAllDevices());
+                            }}
+                          />
+                        </div>
+                        <Link
+                          to={
+                            item.name === "Light" ? "/lightplan" : "/waterplan"
+                          }
+                          className="btn text-success"
+                        >
                           <b>Change</b>
                         </Link>
                       </>
                     ) : (
                       <>
                         <p className="my-0">Not scheduled</p>
-                        <Link to={item.name === "Light" ? "/lightplan" : "/waterplan"} className="btn text-success">
+                        <Link
+                          to={
+                            item.name === "Light" ? "/lightplan" : "/waterplan"
+                          }
+                          className="btn text-success"
+                        >
                           <b>+ New</b>
                         </Link>
                       </>

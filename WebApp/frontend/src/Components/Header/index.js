@@ -1,6 +1,6 @@
 import * as React from "react";
 import logo from "../../Assets/SVG-image/logo.svg";
-import { AiOutlineBell, AiOutlineLogout } from "react-icons/ai";
+import { AiOutlineBell, AiOutlineLogout, AiOutlineMenu } from "react-icons/ai";
 import MyPopper from "../MyPopper";
 import { Fragment } from "react";
 import { IconButton, Tooltip } from "@mui/material";
@@ -13,11 +13,9 @@ import { getNotify, decrement, setCheck } from "../../redux/features/notifySlice
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
+import { host } from "../../redux/store";
 
- 
-const host = "http://localhost:3003"
-
-function Header() {
+function Header({toggleSidebar, showSidebar}) {
   const socketRef = useRef();
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -47,10 +45,13 @@ function Header() {
   
   return (
     <div
-      className="w-100 position-fixed d-flex justify-content-between align-items-center px-5 bg-white py-1 shadow-sm"
-      style={{ height: "var(--header-height)" }}
-    >
-      <img src={logo} />
+      className="w-100 position-fixed d-flex justify-content-between align-items-center px-4 mx-1 bg-white py-1 shadow-sm z-1"
+      style={{ height: "var(--header-height)"}}
+    > 
+      <div className="d-flex align-items-center">
+        <AiOutlineMenu cursor={"pointer"} size={30} onClick={() => toggleSidebar(!showSidebar)}/>
+        <img className="mx-2" src={logo} />  
+      </div>
       <ToastContainer limit={1} />
       <div className="d-flex align-items-center">
         <MyPopper
@@ -70,14 +71,14 @@ function Header() {
                     fontSize: 14,
                   }}
                 >
-                  {numNotify > 100 ? 99 : numNotify}
+                  {numNotify > 100 ? '99+' : numNotify}
                 </span>
               )}
             </Fragment>
           }
         >
           {/* <div>Hiển thị danh sách thông báo ở đây</div> */}
-          <div  style={{maxHeight: "310px", overflowY: "auto", overflowX: "hidden"}}>
+          <div style={{maxHeight: "310px", overflowY: "auto", overflowX: "hidden"}}>
           { 
             data.map((item) => {
               return (<Notify item={item} />)
