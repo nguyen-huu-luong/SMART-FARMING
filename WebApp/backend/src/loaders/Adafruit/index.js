@@ -89,7 +89,6 @@ exports.adafruit = (socketIo) => {
         checker.emitCheck = false
         socketIo.emit("receiveMess", checker.mess)
       }
-      else {
         let ack = message.toString();
         ack = ack.split(':');
         try {
@@ -100,7 +99,6 @@ exports.adafruit = (socketIo) => {
           socketIo.emit("receiveACk", { publish_btn: ack[0], value: Number(ack[1]) });
         } catch (error) {
           socketIo.emit("DatabaseError", { error: error })
-        }
       }
     }
     else if (topic == `${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`) {
