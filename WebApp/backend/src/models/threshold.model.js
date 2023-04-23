@@ -4,7 +4,7 @@ let threshold = mongoose.Schema({
     minValue: Number,
     maxValue: Number,
     typeThres: String,
-    userID: Number, 
+    userID: String, 
 }, { timestamps: true });
 
 exports.model = mongoose.model("threshold", threshold)

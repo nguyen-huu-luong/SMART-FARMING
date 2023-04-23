@@ -6,11 +6,20 @@ import home3 from "../../Assets/Image/home3.png"
 import home4 from "../../Assets/Image/home4.png"
 import home5 from "../../Assets/Image/home5.png"
 import home6 from "../../Assets/Image/home6.jpg"
+import Luong from "../../Assets/Image/Luong.png"
+import Triet from "../../Assets/Image/Triet.png"
+import Vuong from "../../Assets/Image/Vuong.png"
+import Hung from "../../Assets/Image/Hung.png"
 
 let serviceHome = [{titile: "Garden Watering Systems" , img:home2, info: "Lorem ipsum dolor sit amet, consectetur elit. Curabitur euismod enim a metus adipiscing."},
 {titile: "Preparing Landscape" , img:home3, info: "Lorem ipsum dolor sit amet, consectetur elit. Curabitur euismod enim a metus adipiscing."},
 {titile: "Garden Fence" , img:home4, info: "Lorem ipsum dolor sit amet, consectetur elit. Curabitur euismod enim a metus adipiscing."},
 {titile: "Garden Supplies" , img:home5, info: "Lorem ipsum dolor sit amet, consectetur elit. Curabitur euismod enim a metus adipiscing."}
+]
+let ourTeam = [{titile: "Hoàng Minh Triết" , img:Triet, info: "Triet is the chief executive officer of the farm. He helped the company grow fast."},
+{titile: "Liễu Minh Vương" , img:Vuong, info: "Vuong is the largest shareholder. He has made huge investments in the farm."},
+{titile: "Nguyễn Hữu Hùng" , img:Hung, info: "Hung is the co-founder of the farm. He researched the technology for farm."},
+{titile: "Nguyễn Hữu Lượng" , img:Luong, info: "Luong is the co-founder of the farm. He helped the farm out of the crisis."}
 ]
 
 const Home = () => {
@@ -39,6 +48,23 @@ const Home = () => {
                         <div><img src={item.img} style={{width:"140px", height:"140px"}} />
                             <h6 className="my-3">{item.titile}</h6>
                             <p className="fst-italic  text-secondary">{item.info}</p>
+                        </div>
+                    </div>
+                        ))
+                    }
+                </div>
+                <div className="mt-5 mb-5">
+                    <h3 className="pt-3">Our team</h3>
+                    <p className="fst-italic  text-secondary mb-2">List of outstanding people!</p>
+                    <div className="bg-success m-auto pt-0 mt-0" style={{ height: "2px", width: "70px" }}></div>
+                </div>
+                <div className="container-fluid row mb-5">
+                    {
+                        ourTeam.map((item, index) => (
+                            <div key={index} className="col-md">
+                        <div><img src={item.img} style={{width:"140px", height:"140px"}} />
+                            <h6 className="my-3">{item.titile}</h6>
+                            <p className="fst-italic  text-secondary mx-2">{item.info}</p>
                         </div>
                     </div>
                         ))
