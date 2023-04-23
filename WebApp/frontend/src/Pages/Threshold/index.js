@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import { useState, useRef, useEffect } from "react"
 import { useDispatch, useSelector, } from "react-redux"
 import { getThreshold, updateThreshold } from "../../redux/features/thresholdSlice"
+import ThresInfo from "./thresInfo"
 
 const Threshold = () => {
     const [show, setShow] = useState(false);
@@ -45,7 +46,10 @@ const Threshold = () => {
     return (
         <div className="container p-4 w-100" style={{ minHeight: "90vh" }}>
             <StatusBar title="Set threshold" />
-            <div className="container p-3 py-5 my-2 mx-2 w-100 bg-white border rounded">
+            <div className="container p-3 my-2 mx-2 w-100 bg-white border rounded">
+            <div className="d-flex justify-content-end  pb-5">
+                {<ThresInfo />}
+            </div>
                 <form className="container" onSubmit={handleShow} >
                     <div className="container d-flex justify-content-around" >
                         <ThresItem name="Humidity" image={Humidity} color="#1793ED" minValue={{ min: 0, value: dataValue.thresValue[0].min }} maxValue={{ max: 1, value: dataValue.thresValue[0].max }} refer={value} />

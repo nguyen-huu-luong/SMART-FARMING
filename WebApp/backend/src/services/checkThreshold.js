@@ -11,6 +11,7 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
         if (data < minValue) {
             if (bt == 0) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "1")
+                socketIo.emit("waitingAck", {publish_btn: "button1", value: 1})
                 await notify.addNotify({title: "Light is less than threshold", content: "Turn on light", buttonStatus: "Off", current1: data, current2: "" , type: 0})
                 checker.emitCheck = true
                 checker.mess = "Light is greater than threshold"
@@ -27,6 +28,7 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
         else if (data > maxValue) {
             if (bt == 1) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "0")
+                socketIo.emit("waitingAck", {publish_btn: "button1", value: 0})
                 await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light", buttonStatus: "On", current1: data, type: 0})
                 checker.emitCheck = true
                 checker.mess = "Light is greater than threshold"
@@ -69,6 +71,7 @@ exports.HumiThreshold = async (client, data, bt, socketIo, checker) => {
         if(thresTemp > maxTemp) {
             if (bt == 1) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
+                socketIo.emit("waitingAck", {publish_btn: "button2", value: 0})
                 await notify.addNotify({title: "Temp is greater than threshold", content: "Turn off pump", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 checker.emitCheck = true
                 checker.mess = "Temp is greater than threshold"
@@ -82,6 +85,7 @@ exports.HumiThreshold = async (client, data, bt, socketIo, checker) => {
         else if (thresHumi < minHumi ) {
             if (bt == 0) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "1")
+                socketIo.emit("waitingAck", {publish_btn: "button2", value: 1})
                 await notify.addNotify({title: "Humidity is less than threshold", content: "Turn on pump", buttonStatus: "On", current1: thresHumi, current2: thresTemp, type:1})
                 checker.emitCheck = true
                 checker.mess = "Humidity is less than threshold"
@@ -96,6 +100,7 @@ exports.HumiThreshold = async (client, data, bt, socketIo, checker) => {
         else if (thresHumi > maxHumi) {
             if (bt == 1) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button2`, "0")
+                socketIo.emit("waitingAck", {publish_btn: "button2", value: 0})
                 await notify.addNotify({title: "Humidity is greater than threshold", content: "Turn off pump", buttonStatus: "Off", current1: thresHumi, current2: thresTemp, type:1})
                 checker.emitCheck = true
                 checker.mess = "Humidity is greater than threshold"

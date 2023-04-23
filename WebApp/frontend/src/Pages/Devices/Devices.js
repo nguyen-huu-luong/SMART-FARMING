@@ -53,7 +53,7 @@ function Devices() {
             error: "No response from the server, please try again",
           });
         }
-      }, 10000);
+      }, 30000);
     }
 
     return () => clearTimeout(timerId);
