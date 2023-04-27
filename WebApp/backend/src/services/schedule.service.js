@@ -26,7 +26,7 @@ exports.scheduleService = async (clientIO) => {
       await userAct1.save();
       sleep(schedule[0]["run_time"]*1000).then(() => {
         let userAct2 = new userAct({
-          action: "Auto turn off the " + `${(temp === 1) ? "light bulb" : "water pump"}` +
+          action: "Auto turn off the " +  +
             " at " + moment(schedule[0]['time']).add(schedule[0]["run_time"], "seconds").format('h:mm A, dddd, MMMM Do YYYY'), actor: "Server"
         })
         userAct2.save();

@@ -1,13 +1,16 @@
 let userAct = require("../models/userAct.model").model
-
+let moment = require("moment")
 exports.getUserAct = async (req, res, next) => {
     try {
-        let page = req.params.id;
-        const LIMIT = 6;
-        const startIndex = (Number(page) - 1) * LIMIT;
-        const total = await userAct.countDocuments({})
-        const userActs = await userAct.find({}).limit(LIMIT).sort({createdAt: -1}).skip(startIndex);
-        res.status(200).json({data: userActs, totalPages: total});
+        from = new Date(req.query.from)
+        to = new Date(req.query.to)
+        const userActs = await userAct.find({
+          createdAt: {
+            $gte: moment(from).toISOString(),
+            $lte: moment(to).toISOString()
+          }
+        }).sort({createdAt: -1 }); 
+        res.send(userActs)
     }
     catch (err) {
         res.send("Err: " + err)

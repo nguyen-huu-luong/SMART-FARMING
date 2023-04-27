@@ -6,4 +6,5 @@ router.route("/allrecs/:id").get(Record.getAll)
 router.route("/records/average").get(Record.getAvegareValues)
 router.route("/records/:time").get(Record.getByTime)
 router.route("/random").get(Record.createRandomData)
+router.route("/timerecords/:bytime").get(Record.getRecordByTime)
 exports.recordRouter = router

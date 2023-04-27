@@ -12,9 +12,21 @@ export const getAllRecs = createAsyncThunk(
       }
     }
   );
+  export const getRecsByTime = createAsyncThunk(
+    "/allrecsbytime",
+    async (time, { rejectWithValue }) => {
+      try {
+        const respone = await api.getRecordsByTime(time);
+        return respone.data;
+      } catch (error) {
+        return rejectWithValue(error.respone.data)
+      }
+    }
+  );
   const allRecSlice = createSlice({
     name: "allrecords",
     initialState:{
+      timeRecords: [],
       datas: [],
       totalPages: 0,
       loading: false
@@ -29,6 +41,17 @@ export const getAllRecs = createAsyncThunk(
         state.totalPages = action.payload.totalPages
       },
       [getAllRecs.rejected]: (state, action) => {
+        state.loading = false
+        state.error = action.payload.message;
+      },      
+      [getRecsByTime.pending]: (state, action) => {
+        state.loading = true
+      },    
+      [getRecsByTime.fulfilled]: (state, action) => {
+        state.loading = false
+        state.timeRecords = action.payload
+      },
+      [getRecsByTime.rejected]: (state, action) => {
         state.loading = false
         state.error = action.payload.message;
       },

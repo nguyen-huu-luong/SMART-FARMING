@@ -3,7 +3,9 @@ const mqtt = require("mqtt");
 require("dotenv").config();
 
 let Record = require("../../models/records.model").model;
-let Device = require("../../models/devices.model").model
+let Device = require("../../models/devices.model").model;
+let userAct = require("../../models/userAct.model").model
+
 
 let bt1 = 0
 let bt2 = 0
@@ -96,6 +98,10 @@ exports.adafruit = (socketIo) => {
           device.set({ status: Number(ack[1]) })
           let result = await device.save()
           console.log(result)
+          let userAct1 = new userAct({
+            action: "Turn "+`${(ack[0] === 0) ? "on " : "off "}`+`${(ack[0] === "200") ? "water pump" : "light bulb"}`, actor: "User"
+          })
+          userAct1.save();
           socketIo.emit("receiveACk", { publish_btn: ack[0], value: Number(ack[1]) });
         } catch (error) {
           socketIo.emit("DatabaseError", { error: error })
