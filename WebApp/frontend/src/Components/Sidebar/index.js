@@ -166,6 +166,17 @@ function Sidebar({ toggleSidebar }) {
               elemBefore: () => (
                 <AiOutlineHistory color="var(--primary)" size={24} />
               ),
+              subNav: [
+                // Sử dụng nếu có menu con
+                {
+                  title: "View data history",
+                  itemId: "/history",
+                },
+                {
+                  title: "View user history",
+                  itemId: "/userhistory",
+                },
+              ],
             },
           ]}
         />

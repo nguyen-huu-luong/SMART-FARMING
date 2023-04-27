@@ -1,4 +1,5 @@
 let record = require("../models/records.model").model;
+let moment = require('moment')
 
 const transferTime = (type, time) => {
   if (type === "today" || type === "yesterday" || type === "day") {
@@ -198,7 +199,22 @@ exports.getByTime = async (req, res, next) => {
     console.log(err);
   }
 };
-
+exports.getRecordByTime = async (req, res, next) => {
+  try{
+    from = new Date(req.query.from)
+    to = new Date(req.query.to)
+    const records = await record.find({
+      createAt: {
+        $gte: moment(from).toISOString(),
+        $lte: moment(to).toISOString()
+      }
+    }).sort({createdAt: -1 }); 
+    res.send(records)
+  }
+  catch(err) {
+      console.log(err)
+  }
+}
 exports.getAvegareValues = async(req, res, next) => {
   try {
     let date = new Date()

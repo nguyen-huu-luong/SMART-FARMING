@@ -1,47 +1,22 @@
 import moment from "moment";
 import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getRecsByTime } from "../../redux/features/allRecSlice";
+import { getUserAct } from "../../redux/features/userActivitySlice";
 import { MantineReactTable } from "mantine-react-table";
 import StatusBar from "../../Components/StatusBar"
-
-const device = (temp) => {
-  switch (temp) {
-    case "101":
-      return "Temperature sensor";
-    case "102":
-      return "Humidity sensor";
-    default:
-      return "Light sensor";
-  }
-};
-const val = (temp) => {
-  switch (temp) {
-    case "Temp":
-      return "Temperature (°C)";
-    case "Humi":
-      return "Humidity (%)";
-    default:
-      return "Light (LUX)";
-  }
-};
 
 const History = () => {
   const dispatch = useDispatch();
   const columns = useMemo(
     () => [
       {
-        accessorFn: (row) => val(row.type), 
-        header: "Data type",
+        accessorKey: "action", 
+        header: "Action",
         enableSorting: false,
       },
       {
-        accessorKey: "value",
-        header: "Value",
-      },
-      {
-        accessorFn: (row) => device(row.dev_id),
-        header: "Device name",
+        accessorKey: "actor",
+        header: "Actor",
       },
       {
         accessorFn: (row) =>
@@ -65,16 +40,19 @@ const History = () => {
     let totime = form.totime.value;
     let from = `${fromdate} ${fromtime}`
     let to = `${todate} ${totime}`
-    dispatch(getRecsByTime(`range?from=${from}&to=${to}`));
+    console.log(from)
+    dispatch(getUserAct(`range?from=${from}&to=${to}`));
+    console.log(dev)
   };
-  const dev = useSelector((state) => state.datas.timeRecords);
+  const time = new Date();
+  const dev = useSelector((state) => state.data.useract);
 
   useEffect(() => {
-    dispatch(getRecsByTime(`range?from=${"1000-03-16 17:48"}&to=${"3000-03-16 17:48"}`));
-  });
+    dispatch(getUserAct(`range?from=${"1000-03-16 17:48"}&to=${"3000-03-16 17:48"}`));
+  }, []);
   return (
     <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
-      <StatusBar title="View data history"/>
+      <StatusBar title="View user activity"/>
       <div
         className="row border border-gray-300 rounded bg-white mx-2 p-3 w-100 d-flex flex-sm-row flex-column"
         id="pick"

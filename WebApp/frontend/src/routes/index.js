@@ -9,6 +9,7 @@ import Register from "../Pages/Register"
 import Devices from "../Pages/Devices/Devices"
 import Threshold from "../Pages/Threshold"
 import History from "../Pages/History/history"
+import UserHistory from "../Pages/History/userHistory"
 import NotFound from "../Pages/NotFound"
 
 export const routes = [
@@ -38,6 +39,9 @@ export const routes = [
     },
     {
         path: '/history' , component: History, layout: MainLayout
+    },
+    {
+        path: '/userhistory' , component: UserHistory, layout: MainLayout
     },
     {
         path: '*', component: NotFound, layout: null
