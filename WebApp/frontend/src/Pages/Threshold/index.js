@@ -55,7 +55,8 @@ const Threshold = () => {
             maxTemperature: value.current[3].value,
             minLight: value.current[4].value,
             maxLight: value.current[5].value,
-            userID: sessionStorage.getItem("user").toString()
+            userID: sessionStorage.getItem("user").toString(),
+            userName: sessionStorage.getItem("userName").toString()
         }
         setShow(false);
         let checker = validData(data)

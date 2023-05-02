@@ -34,6 +34,7 @@ const userSlice = createSlice({
     name: "user",
     initialState: {
         userID: "",
+        userName: "",
         loading: false,
         registerCheck: false
     },
@@ -48,6 +49,7 @@ const userSlice = createSlice({
             .addCase(authenticate.fulfilled, (state, action) => {
                 state.loading = false
                 state.userID = action.payload.userID
+                state.userName = action.payload.userName
             })
             .addCase(authenticate.rejected, (state, action) => {
                 state.loading = false
