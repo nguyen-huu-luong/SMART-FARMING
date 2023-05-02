@@ -25,7 +25,7 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
                 await notify.addNotify({title: "Light is less than threshold", content: "None", buttonStatus: "On", current1: data, current2: "", type: 0})
                 socketIo.emit("receiveMess", "Light is greater than threshold")
                 let userAct1 = new userAct({
-                    action: "Server notifies user that light is less than threshold", actor: "Server"
+                    action: "Server notifies user that light is greater than threshold", actor: "Server"
                 })
                 userAct1.save();
             }

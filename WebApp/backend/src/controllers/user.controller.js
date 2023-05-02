@@ -44,7 +44,7 @@ exports.auth = async (req, res, next) => {
 
             let checkPwd = await bcrypt.compare(pwd, check[0].passWord)
             if (checkPwd) {
-                res.send({userID: check[0]._id})
+                res.send({userID: check[0]._id, userName: check[0].userName})
             }
             else {
                 res.status(400).send("Incorrect password")

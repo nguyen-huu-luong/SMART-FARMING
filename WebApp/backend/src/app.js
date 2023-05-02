@@ -38,7 +38,6 @@ const startServer = async () => {
     );
     const clientIO = client.connect(process.env.HOST || "http://localhost:3003")
     // Schedule service
-    setInterval(() => service(clientIO), 1000);
     route(app);
     server.listen(process.env.PORT || 3003, () => {
       console.log("Connect to port", process.env.PORT);

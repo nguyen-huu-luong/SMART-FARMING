@@ -6,7 +6,6 @@ export const getUserAct = createAsyncThunk(
     async (time) => {
       try {
         const respone = await api.getUserActivity(time);
-        console.log(respone.data)
         return respone.data;
       } catch (error) {
         return console.log(error)
@@ -17,6 +16,7 @@ export const getUserAct = createAsyncThunk(
     name: "useractivity",
     initialState:{
       useract: [],
+      totalPages: 0,
       loading: false
     },
     extraReducers:{
@@ -25,7 +25,8 @@ export const getUserAct = createAsyncThunk(
       },    
       [getUserAct.fulfilled]: (state, action) => {
         state.loading = false
-        state.useract = action.payload
+        state.useract = action.payload.data
+        state.totalPages = action.payload.totalPages
       },
       [getUserAct.rejected]: (state, action) => {
         state.loading = false

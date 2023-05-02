@@ -1,4 +1,5 @@
 let threshold = require('../models/threshold.model').model
+let userAct = require("../models/userAct.model").model
 
 exports.getThreshold = async (req, res, next) => {
     try{
@@ -50,6 +51,8 @@ exports.setThreshold = async (req, res, next) => {
         await thresT.save()
         let thresL = new threshold({ minValue: thresValue.minLight, maxValue: thresValue.maxLight, typeThres: "Light", userID: thresValue.userID })
         await thresL.save()
+        let userAct1 = new userAct({action: "Set threshold", actor: thresValue.userName})
+        await userAct1.save()
         res.send("success")
     }
     catch (err) {
@@ -77,6 +80,8 @@ exports.updateThreshold = async (req, res, next) => {
             await threshold.updateOne({ typeThres: "Humidity" }, { minValue: thresValue.minHumidity, maxValue: thresValue.maxHumidity, userID: thresValue.userID })
             await threshold.updateOne({ typeThres: "Temperature" }, { minValue: thresValue.minTemperature, maxValue: thresValue.maxTemperature,  userID: thresValue.userID })
             await threshold.updateOne({ typeThres: "Light" }, { minValue: thresValue.minLight, maxValue: thresValue.maxLight, userID: thresValue.userID })
+            let userAct1 = new userAct({action: "Modify threshold", actor: thresValue.userName})
+            await userAct1.save()
             res.send("success")
         }
     }

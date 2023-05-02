@@ -2,13 +2,23 @@ import { Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { authenticate } from "../../redux/features/userSlice"
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { host } from "../../redux/store";
+let client = require('socket.io-client')
 const Login = () => {
-
+    const socketRef = useRef()
+    useEffect(() => {
+      socketRef.current = client.connect(host);
+      return () => {
+        socketRef.current.disconnect();
+      };
+    });
     let dispatch = useDispatch()
     let navigate = useNavigate()
     let [checked, setChecked] = useState(false)
     let userID = useSelector((state) => state.user.userID)
+    let name = useSelector((state) => state.user.userName)
+
     const handelLogin = async (event) => {
         event.preventDefault()
         let userName = event.target.userName.value
@@ -17,8 +27,13 @@ const Login = () => {
         setChecked(true)
         // navigate('/dashboard')
     }
-    if (userID != "") {
-        sessionStorage.setItem('user', userID) 
+    if (userID !== "") {
+        sessionStorage.setItem('user', userID)
+        sessionStorage.setItem('userName', name)  
+        socketRef.current.emit("action", {
+            action: `Log in`,
+            name: sessionStorage.getItem('userName')
+        });
         navigate('/dashboard')
     }
 

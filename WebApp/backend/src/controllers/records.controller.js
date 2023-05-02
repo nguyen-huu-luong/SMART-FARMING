@@ -203,13 +203,30 @@ exports.getRecordByTime = async (req, res, next) => {
   try{
     from = new Date(req.query.from)
     to = new Date(req.query.to)
+    page = req.query.page
+    data_type = req.query.type
+    if (data_type == "All"){
+      data_type = ["Humi", "Temp", "Light"]
+    }
+    const LIMIT = 10;
+    const startIndex = (Number(page) - 1) * LIMIT;
+    const total = await record.countDocuments(
+      {
+        createAt: {
+          $gte: moment(from).toISOString(),
+          $lte: moment(to).toISOString()
+        },
+        type: data_type
+      }
+    )
     const records = await record.find({
       createAt: {
         $gte: moment(from).toISOString(),
         $lte: moment(to).toISOString()
-      }
-    }).sort({createdAt: -1 }); 
-    res.send(records)
+      },
+        type: data_type
+    }).limit(LIMIT).sort({createAt: -1 }).skip(startIndex);
+    res.status(200).json({data: records, totalPages: total});
   }
   catch(err) {
       console.log(err)
