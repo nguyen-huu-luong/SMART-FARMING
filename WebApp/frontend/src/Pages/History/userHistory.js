@@ -31,6 +31,7 @@ const History = () => {
     });
   };
   const useract = useSelector((state) => state.data.useract);
+  const loading = useSelector((state) => state.data.loading);
   const totalHistory = Number(useSelector((state) => state.data.totalPages));
   const [page, setPage] = useState(1);
 
@@ -128,6 +129,8 @@ const History = () => {
             ]}
             withBorder
             records={useract}
+            fetching = {loading}
+            loaderSize={'sm'}
             recordsPerPage={8}
             totalRecords={totalHistory}
             page={page}

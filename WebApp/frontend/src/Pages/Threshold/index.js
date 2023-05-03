@@ -10,6 +10,7 @@ import { useDispatch, useSelector, } from "react-redux"
 import { getThreshold, updateThreshold } from "../../redux/features/thresholdSlice"
 import ThresInfo from "./thresInfo"
 import { useViewport } from "../../hooks"
+import Loading from "../../Components/Loading"
 
 const Threshold = () => {
     const [show, setShow] = useState(false);
@@ -73,6 +74,7 @@ const Threshold = () => {
         <div className="py-2 px-0 p-md-4 container w-100 " style={{ minHeight: "90vh", maxWidth: "100%" }}>
             <StatusBar title="Set threshold" />
             <div className="p-3 my-2 mx-2 w-100 bg-white border rounded w-100">
+                {dataValue.loading && <Loading />}
                 <div className="d-flex justify-content-end  pb-5">
                     {<ThresInfo />}
                 </div>
