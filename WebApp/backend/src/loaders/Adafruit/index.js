@@ -1,6 +1,7 @@
 let check = require('../../services/checkThreshold')
 const mqtt = require("mqtt");
 require("dotenv").config();
+let service = require("../../services/schedule.service").scheduleService
 
 let Record = require("../../models/records.model").model;
 let Device = require("../../models/devices.model").model;
@@ -10,14 +11,40 @@ let userAct = require("../../models/userAct.model").model
 let bt1 = 0
 let bt2 = 0
 let checker = { emitCheck: false, mess: "" }
-
+let checkTurnOff = { action: "", btn: ""}
 exports.adafruit = (socketIo) => {
   let client = mqtt.connect(
     `mqtt://${process.env.ADAFRUIT_IO_USERNAME}:${process.env.ADAFRUIT_IO_KEY}@io.adafruit.com`,
     8883
   );
+  setInterval(() => {
+    service(client, socketIo, checkTurnOff, bt1, bt2);
+    if (checkTurnOff.action != ""){
+      let btn = (checkTurnOff.btn == "button1")?bt1:bt2;
+      if (btn != 0){
+        let userAct2 = new userAct({
+          action: checkTurnOff.action,
+          actor: "Server",
+        });
+        userAct2.save();
+        client.publish(
+          `${process.env.ADAFRUIT_IO_USERNAME}/feeds/${checkTurnOff.btn}`,
+          "0"
+        );
+        socketIo.emit("waitingAck", { publish_btn: checkTurnOff.btn, value: 0 });
+      } else {
+        let finalaction = checkTurnOff.action + ` but the ${checkTurnOff.btn === "button1" ? "light bulb" : "water pump"} is already turned off`
+        let userAct2 = new userAct({
+          action: finalaction,
+          actor: "Server",
+        });
+        userAct2.save();
+      }
+      checkTurnOff = { action: "", btn: ""}
+    }
+  }, 1000);
   socketIo.on("connection", (socket) => {
-    socket.on("toggleButton", (message) =>
+    socket.on("toggleButton", (message) => {
       client.publish(
         `${process.env.ADAFRUIT_IO_USERNAME}/feeds/${message.publish_btn}`,
         message.value.toString(),
@@ -30,7 +57,19 @@ exports.adafruit = (socketIo) => {
           socketIo.emit("waitingAck", message)
         }
       )
+      let userAct1 = new userAct({
+        action: `Turn ${message.value?"on":"off"} ${message.publish_btn=="button1"?" the light":" the water pump"}`, 
+        actor: message.user
+      })
+      userAct1.save();
+    }
     );
+    socket.on("action", (message) => {
+        let userAct1 = new userAct({
+          action: message.action, actor: message.name
+        })
+        userAct1.save();
+    })
   });
   client.on("connect", function () {
     client.subscribe(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/cambien1`); // temp
@@ -98,11 +137,11 @@ exports.adafruit = (socketIo) => {
           device.set({ status: Number(ack[1]) })
           let result = await device.save()
           console.log(result)
-          let userAct1 = new userAct({
-            action: "Turn "+`${(ack[0] === 0) ? "on " : "off "}`+`${(ack[0] === "200") ? "water pump" : "light bulb"}`, actor: "User"
-          })
-          userAct1.save();
           socketIo.emit("receiveACk", { publish_btn: ack[0], value: Number(ack[1]) });
+          // let userAct1 = new userAct({
+          //   action: "Turn "+`${(ack[0] === 0) ? "on " : "off "}`+`${(ack[0] === "200") ? "water pump" : "light bulb"}`, actor: sessionStorage.getItem('userName')
+          // })
+          // userAct1.save();
         } catch (error) {
           socketIo.emit("DatabaseError", { error: error })
       }

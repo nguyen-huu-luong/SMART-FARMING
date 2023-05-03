@@ -49,7 +49,9 @@ export const getAllRecs = createAsyncThunk(
       },    
       [getRecsByTime.fulfilled]: (state, action) => {
         state.loading = false
-        state.timeRecords = action.payload
+        state.timeRecords = action.payload.data
+        state.totalPages = action.payload.totalPages
+
       },
       [getRecsByTime.rejected]: (state, action) => {
         state.loading = false

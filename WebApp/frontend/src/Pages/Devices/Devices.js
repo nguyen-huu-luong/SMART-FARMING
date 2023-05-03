@@ -37,6 +37,7 @@ function Devices() {
     socketRef.current.emit("toggleButton", {
       publish_btn,
       value: isCheck ? 1 : 0,
+      user: sessionStorage.getItem("userName")
     });
     setWaiting((state) => {
       return { ...state, btn: publish_btn, isWaiting: true };

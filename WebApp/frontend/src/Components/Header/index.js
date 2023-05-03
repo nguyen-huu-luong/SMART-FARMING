@@ -35,6 +35,10 @@ function Header({toggleSidebar, showSidebar}) {
 
   //navigate('/')
   const handelLogout = () => {
+    socketRef.current.emit("action", {
+      action: `Log out`,
+      name: sessionStorage.getItem('userName')
+    });
     sessionStorage.clear()
     navigate('/')
   }
