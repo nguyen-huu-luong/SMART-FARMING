@@ -11,13 +11,38 @@ let userAct = require("../../models/userAct.model").model
 let bt1 = 0
 let bt2 = 0
 let checker = { emitCheck: false, mess: "" }
-
+let checkTurnOff = { action: "", btn: ""}
 exports.adafruit = (socketIo) => {
   let client = mqtt.connect(
     `mqtt://${process.env.ADAFRUIT_IO_USERNAME}:${process.env.ADAFRUIT_IO_KEY}@io.adafruit.com`,
     8883
   );
-  setInterval(() => service(client, socketIo), 1000);
+  setInterval(() => {
+    service(client, socketIo, checkTurnOff, bt1, bt2);
+    if (checkTurnOff.action != ""){
+      let btn = (checkTurnOff.btn == "button1")?bt1:bt2;
+      if (btn != 0){
+        let userAct2 = new userAct({
+          action: checkTurnOff.action,
+          actor: "Server",
+        });
+        userAct2.save();
+        client.publish(
+          `${process.env.ADAFRUIT_IO_USERNAME}/feeds/${checkTurnOff.btn}`,
+          "0"
+        );
+        socketIo.emit("waitingAck", { publish_btn: checkTurnOff.btn, value: 0 });
+      } else {
+        let finalaction = checkTurnOff.action + ` but the ${checkTurnOff.btn === "button1" ? "light bulb" : "water pump"} is already turned off`
+        let userAct2 = new userAct({
+          action: finalaction,
+          actor: "Server",
+        });
+        userAct2.save();
+      }
+      checkTurnOff = { action: "", btn: ""}
+    }
+  }, 1000);
   socketIo.on("connection", (socket) => {
     socket.on("toggleButton", (message) => {
       client.publish(
