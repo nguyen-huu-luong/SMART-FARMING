@@ -13,9 +13,9 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
             if (bt == 0) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "1")
                 socketIo.emit("waitingAck", {publish_btn: "button1", value: 1})
-                await notify.addNotify({title: "Light is less than threshold", content: "Turn on light", buttonStatus: "Off", current1: data, current2: "" , type: 0})
+                await notify.addNotify({title: "Light is less than threshold", content: "Turn on light", buttonStatus: "On", current1: data, current2: "" , type: 0})
                 checker.emitCheck = true
-                checker.mess = "Light is greater than threshold"
+                checker.mess = "Light is less than threshold"
                 let userAct1 = new userAct({
                     action: "Server notifies user that light is less than threshold and turns on the light", actor: "Server"
                 })
@@ -23,9 +23,9 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
             }
             else {
                 await notify.addNotify({title: "Light is less than threshold", content: "None", buttonStatus: "On", current1: data, current2: "", type: 0})
-                socketIo.emit("receiveMess", "Light is greater than threshold")
+                socketIo.emit("receiveMess", "Light is less than threshold")
                 let userAct1 = new userAct({
-                    action: "Server notifies user that light is greater than threshold", actor: "Server"
+                    action: "Server notifies user that light is less than threshold", actor: "Server"
                 })
                 userAct1.save();
             }
@@ -38,7 +38,7 @@ exports.LightTheshold = async (client, data, bt,socketIo, checker) => {
             if (bt == 1) {
                 client.publish(`${process.env.ADAFRUIT_IO_USERNAME}/feeds/button1`, "0")
                 socketIo.emit("waitingAck", {publish_btn: "button1", value: 0})
-                await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light", buttonStatus: "On", current1: data, type: 0})
+                await notify.addNotify({title: "Light is greater than threshold", content: "Turn off light", buttonStatus: "Off", current1: data, type: 0})
                 checker.emitCheck = true
                 checker.mess = "Light is greater than threshold"
                 let userAct1 = new userAct({
