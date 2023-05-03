@@ -8,15 +8,24 @@ This is a project that we do in the Multidisciplinary Project 2023
 ## Getting Started
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+* You can download the source code at [here](https://github.com/nguyen-huu-luong/SMART-FARMING.git)
+* In the backend/WebApp directory you create an .env file containing the values ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY, MONGODB_URI, PORT
 
 ### Executing program
 
-* How to run the program
-* Step-by-step bullets
+* Firstly, you start the gateway with the following command
 ```
 code blocks for commands
+```
+* Then, you will start the frontend of web (assuming you are in the frontend/WebApp directory)
+```
+npm i
+npm start
+```
+* Finally, you will start the backend of web (assuming you are in the backend/WebApp directory)
+```
+npm i
+npm start
 ```
 
 ## Authors
@@ -29,6 +38,6 @@ code blocks for commands
 
 * 0.2
     * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
+    * See [commit change](https://github.com/nguyen-huu-luong/SMART-FARMING/commits/master) or See [release history](https://github.com/nguyen-huu-luong/SMART-FARMING/commits/master)
 * 0.1
     * Initial Release
