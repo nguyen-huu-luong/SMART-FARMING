@@ -32,6 +32,7 @@ import {
   getRecordsData,
 } from "../../redux/features/recordSlice";
 import { useViewport } from "../../hooks";
+import Loading from "../../Components/Loading";
 
 ChartJS.register(
   LinearScale,
@@ -45,7 +46,7 @@ ChartJS.register(
   BarController
 );
 
-function DataBox({ data, last_item = false }) {
+function DataBox({ data, last_item = false}) {
   const viewport = useViewport()
   if (data === {}) return <></>;
   let color = getColor(data.type);
@@ -54,6 +55,7 @@ function DataBox({ data, last_item = false }) {
       md={4}
       sm = {12}
       xs ={12}
+      className="position-relative"
     >
       <div className={`${last_item || viewport.width <= 768 ? ' ' : 'me-3'} bg-white shadow p-3 my-2`}  style={{ borderBottom: `6px solid ${color}`, borderRadius: 8 }}>
         <div className="d-flex align-items-center justify-content-between">
@@ -89,7 +91,7 @@ function DataBox({ data, last_item = false }) {
 
 // main compoent
 function Dashboard() {
-  const { enviromentParams, recordsData, averageValues } = useSelector(
+  const { enviromentParams, recordsData, averageValues, loading } = useSelector(
     (state) => ({
       ...state.records,
     })
@@ -190,9 +192,10 @@ function Dashboard() {
   return (
     <>
       <Container
-        className="py-2 px-0 p-md-4 d-flex flex-column w-100 gap-2 h-100"
+        className="py-2 px-0 p-md-4 d-flex flex-column w-100 gap-2 h-100 position-relative"
         style={{ maxWidth: "100%" }}
       >
+        {loading && <Loading />}
         <StatusBar title="Dashboard" />
         <Row className="gx-0  mx-2 w-100 justify-content-between">
           {enviromentParams.map((item, index) => (

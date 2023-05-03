@@ -1,0 +1,9 @@
+.loading-container {
+    position: absolute;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba($color: #ccc, $alpha: 0.5);
+}
