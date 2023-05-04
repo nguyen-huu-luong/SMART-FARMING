@@ -6,7 +6,7 @@ let record = mongoose.Schema({
     dev_id: String,
     createAt: Date,
 },
-    { timestamps: true }
+    // { timestamps: true }
 );
 
 exports.model = mongoose.model("Record", record)

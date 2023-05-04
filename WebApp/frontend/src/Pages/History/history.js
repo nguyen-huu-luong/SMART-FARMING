@@ -57,6 +57,7 @@ const History = () => {
   };
   const dev = useSelector((state) => state.datas.timeRecords);
   const totalHistory = Number(useSelector((state) => state.datas.totalPages));
+  const loading = useSelector((state) => state.datas.loading);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -173,6 +174,8 @@ const History = () => {
             ]}
             withBorder
             records={dev}
+            fetching = {loading}
+            loaderSize={'sm'}
             recordsPerPage={10}
             totalRecords={totalHistory}
             page={page}

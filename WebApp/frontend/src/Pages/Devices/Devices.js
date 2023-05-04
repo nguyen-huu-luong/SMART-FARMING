@@ -19,6 +19,7 @@ import MyModal from "../../Components/MyModal";
 import CountDown from "../../Components/CountDown";
 import { useViewport } from "../../hooks";
 import { host } from "../../redux/store";
+import Loading from "../../Components/Loading";
 
 function Devices() {
   const [waiting, setWaiting] = useState({
@@ -31,7 +32,6 @@ function Devices() {
   const viewport = useViewport();
   const devices = useSelector((state) => state.devices);
   const data = devices.devices;
-  console.log("re-render", waiting);
 
   const handleToggle = (publish_btn, isCheck) => {
     socketRef.current.emit("toggleButton", {
@@ -97,6 +97,7 @@ function Devices() {
       >
         <StatusBar title="IoT dashboard" />
         <Row className="g-0 w-100 mt-3 mb-1">
+          {devices.loading && <Loading />}
           {data
             .filter((item) => item.type === "input")
             .map(

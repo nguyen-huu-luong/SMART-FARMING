@@ -23,6 +23,8 @@ const Countdown = ({ targetDate, handleTimeOut }) => {
   const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
   const seconds = Math.floor((remainingTime / 1000) % 60);
 
+  console.log(remainingTime, days, hours, minutes, seconds)
+
   return (
     <div>
       {days > 0 ? `${days}d ` : ""} {hours < 10 ? '0' + hours : hours} : {minutes < 10 ? '0' + minutes: minutes} : {seconds < 10 ? '0' + seconds: seconds}
