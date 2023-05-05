@@ -132,6 +132,7 @@ exports.adafruit = (socketIo) => {
       }
         let ack = message.toString();
         ack = ack.split(':');
+        console.log(ack)
         try {
           let device = await Device.findOne({ publish_btn: { $eq: ack[0] } });
           device.set({ status: Number(ack[1]) })

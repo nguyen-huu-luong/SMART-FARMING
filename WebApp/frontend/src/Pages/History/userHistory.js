@@ -43,7 +43,7 @@ const History = () => {
     );
   }, [dispatch, page, initialDate]);
   return (
-    <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
+    <div className="container-fluid p-md-4 p-0 d-flex flex-column w-100 gap-2">
       <StatusBar title="View user history" />
       <div
         className="row border border-gray-300 rounded bg-white mx-2 p-3 w-100 d-flex flex-sm-row flex-column justi"

@@ -357,7 +357,7 @@ const WaterPlan = () => {
           </div>
         </div>
       </div>
-      <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
+      <div className="container-fluid p-md-4 p-0 d-flex flex-column w-100 gap-2">
         <div
           className="row border border-gray-300 rounded bg-white p-3 mx-2 flex-row w-100 justify-content-between align-items-center"
           id="top-nav"
@@ -379,7 +379,7 @@ const WaterPlan = () => {
                   Weekly
                 </th>
                 <th scope="col" className="text-center">
-                  Device run time &#40;s&#41;
+                Runtime &#40;s&#41;
                 </th>
                 <th scope="col" className="text-end">
                   <Button
@@ -388,7 +388,7 @@ const WaterPlan = () => {
                       handleShow();
                     }}
                   >
-                    Add a date
+                    Add
                   </Button>
                 </th>
               </tr>
@@ -406,7 +406,7 @@ const WaterPlan = () => {
                     {current.weekly && <MdOutlineDone />}
                   </td>
                   <td className="text-center"> {current.run_time} </td>
-                  <td className="text-end d-flex gap-2 flex-row-reverse">
+                  <td className="text-end d-flex gap-2 flex-sm-row-reverse flex-column-reverse">
                     <button
                       type="button"
                       className="btn btn-danger ml-2"
