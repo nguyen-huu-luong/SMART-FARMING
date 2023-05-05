@@ -10,11 +10,11 @@ import { DataTable } from "mantine-datatable";
 const device = (temp) => {
   switch (temp) {
     case "101":
-      return "Temperature sensor";
+      return "Light sensor";
     case "102":
       return "Humidity sensor";
     default:
-      return "Light sensor";
+      return "Temperature sensor";
   }
 };
 const val = (temp) => {
@@ -68,10 +68,10 @@ const History = () => {
     );
   }, [dispatch, page, initialDate, dataType]);
   return (
-    <div className="container-fluid p-4 d-flex flex-column w-100 gap-2">
+    <div className="container-fluid p-md-4 p-0 d-flex flex-column w-100 gap-2">
       <StatusBar title="View data history" />
       <div
-        className="row border border-gray-300 rounded bg-white mx-2 p-3 w-100 d-flex flex-sm-row flex-column justi"
+        className="row border border-gray-300 rounded bg-white mx-2 p-3 w-100 d-flex flex-sm-row flex-column"
         id="pick"
       >
         <form
